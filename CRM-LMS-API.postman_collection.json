@@ -1,0 +1,4264 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "CRM LMS API",
+		"description": "Complete API collection for CRM Learning Management System\n\nBase URL: https://api.crm-lms.kz/api/v1\n\nAuthentication: JWT Bearer Token\n\nVersion: 1.0.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', response.accessToken);",
+									"    pm.collectionVariables.set('refresh_token', response.refreshToken);",
+									"    pm.collectionVariables.set('user_id', response.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"invitationToken\": \"abc123xyz\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user with invitation token"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"invitationToken\": \"abc123xyz\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"user\": {\n    \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"email\": \"student@example.com\",\n    \"firstName\": \"Алия\",\n    \"lastName\": \"Смагулова\",\n    \"role\": \"student\",\n    \"isEmailVerified\": false,\n    \"createdAt\": \"2024-03-15T10:00:00Z\"\n  },\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJlbWFpbCI6InN0dWRlbnRAZXhhbXBsZS5jb20iLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTcxMDQ5ODAwMCwiZXhwIjoxNzEwNTg0NDAwfQ.example_signature\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0b2tlblZlcnNpb24iOjEsImlhdCI6MTcxMDQ5ODAwMCwiZXhwIjoxNzExMTAyODAwfQ.example_refresh_signature\"\n}"
+						},
+						{
+							"name": "Error - Invalid Token - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"invitationToken\": \"invalid_token\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Invalid invitation token\",\n  \"statusCode\": 400\n}"
+						},
+						{
+							"name": "Error - Email Exists - 409",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"existing@example.com\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"invitationToken\": \"abc123xyz\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"Email already exists\",\n  \"statusCode\": 409\n}"
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', response.accessToken);",
+									"    pm.collectionVariables.set('refresh_token', response.refreshToken);",
+									"    pm.collectionVariables.set('user_id', response.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login to the system with email and password"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"SecurePass123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"user\": {\n    \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"email\": \"student@example.com\",\n    \"firstName\": \"Алия\",\n    \"lastName\": \"Смагулова\",\n    \"role\": \"student\",\n    \"profilePhotoUrl\": \"https://cdn.example.com/photos/user123.jpg\"\n  },\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJlbWFpbCI6InN0dWRlbnRAZXhhbXBsZS5jb20iLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTcxMDQ5ODAwMCwiZXhwIjoxNzEwNTg0NDAwfQ.example_signature\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0b2tlblZlcnNpb24iOjEsImlhdCI6MTcxMDQ5ODAwMCwiZXhwIjoxNzExMTAyODAwfQ.example_refresh_signature\"\n}"
+						},
+						{
+							"name": "Error - Invalid Credentials - 401",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"WrongPassword\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Invalid credentials\",\n  \"statusCode\": 401\n}"
+						},
+						{
+							"name": "Error - Account Inactive - 403",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"inactive@example.com\",\n  \"password\": \"SecurePass123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Forbidden\",\n  \"message\": \"Account inactive\",\n  \"statusCode\": 403\n}"
+						}
+					]
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', response.accessToken);",
+									"    pm.collectionVariables.set('refresh_token', response.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "Refresh access token using refresh token"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/refresh",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"refresh"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.new_access_token\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.new_refresh_token\"\n}"
+						},
+						{
+							"name": "Error - Invalid Token - 401",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"refreshToken\": \"invalid_token\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/refresh",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"refresh"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Invalid refresh token\",\n  \"statusCode\": 401\n}"
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout from the system"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/auth/logout",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"logout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"message\": \"Logged out successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"email_verification_token_abc123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-email",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify-email"
+							]
+						},
+						"description": "Verify user email address"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"token\": \"valid_token\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/verify-email",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"verify-email"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"message\": \"Email verified successfully\"\n}"
+						},
+						{
+							"name": "Error - Invalid Token - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"token\": \"invalid_token\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/verify-email",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"verify-email"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Invalid or expired verification token\",\n  \"statusCode\": 400\n}"
+						}
+					]
+				}
+			],
+			"description": "Authentication and authorization endpoints"
+		},
+		{
+			"name": "Admin - User Management",
+			"item": [
+				{
+					"name": "Send Invitation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('invitation_id', response.id);",
+									"    pm.collectionVariables.set('invitation_token', response.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"student\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/invitations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"invitations"
+							]
+						},
+						"description": "Admin sends invitation to new user"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"student\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/invitations",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"invitations"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"660e8400-e29b-41d4-a716-446655440001\",\n  \"email\": \"newuser@example.com\",\n  \"role\": \"student\",\n  \"token\": \"abc123xyz\",\n  \"expiresAt\": \"2024-03-22T10:00:00Z\",\n  \"status\": \"pending\",\n  \"createdAt\": \"2024-03-15T10:00:00Z\"\n}"
+						},
+						{
+							"name": "Error - Insufficient Permissions - 403",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"student\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/invitations",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"invitations"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Forbidden\",\n  \"message\": \"Insufficient permissions. Admin or Super Admin role required.\",\n  \"statusCode\": 403\n}"
+						},
+						{
+							"name": "Error - User Exists - 409",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"existing@example.com\",\n  \"role\": \"student\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/invitations",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"invitations"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"User with this email already exists\",\n  \"statusCode\": 409\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Invitations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/invitations?status=pending&limit=20&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"invitations"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "pending | accepted | expired"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Get list of all invitations"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/invitations?status=pending&limit=20&offset=0",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"invitations"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "pending"
+										},
+										{
+											"key": "limit",
+											"value": "20"
+										},
+										{
+											"key": "offset",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"invitations\": [\n    {\n      \"id\": \"660e8400-e29b-41d4-a716-446655440001\",\n      \"email\": \"user1@example.com\",\n      \"role\": \"student\",\n      \"status\": \"pending\",\n      \"expiresAt\": \"2024-03-22T10:00:00Z\",\n      \"invitedBy\": {\n        \"id\": \"770e8400-e29b-41d4-a716-446655440002\",\n        \"firstName\": \"Админ\",\n        \"lastName\": \"Петров\"\n      },\n      \"createdAt\": \"2024-03-15T10:00:00Z\"\n    },\n    {\n      \"id\": \"660e8400-e29b-41d4-a716-446655440003\",\n      \"email\": \"user2@example.com\",\n      \"role\": \"instructor\",\n      \"status\": \"pending\",\n      \"expiresAt\": \"2024-03-23T10:00:00Z\",\n      \"invitedBy\": {\n        \"id\": \"770e8400-e29b-41d4-a716-446655440002\",\n        \"firstName\": \"Админ\",\n        \"lastName\": \"Петров\"\n      },\n      \"createdAt\": \"2024-03-16T10:00:00Z\"\n    }\n  ],\n  \"total\": 50,\n  \"limit\": 20,\n  \"offset\": 0\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users?role=student&status=active&search=&limit=20&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "student",
+									"description": "admin | instructor | student"
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"description": "active | inactive"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by name or email"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Get list of all users with filters"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/users?limit=20&offset=0",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"users"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "20"
+										},
+										{
+											"key": "offset",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"users\": [\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"email\": \"aliya@example.com\",\n      \"firstName\": \"Алия\",\n      \"lastName\": \"Смагулова\",\n      \"role\": \"student\",\n      \"status\": \"active\",\n      \"isEmailVerified\": true,\n      \"createdAt\": \"2024-01-15T10:00:00Z\",\n      \"lastLoginAt\": \"2024-03-15T08:30:00Z\"\n    },\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440011\",\n      \"email\": \"nurzhan@example.com\",\n      \"firstName\": \"Нуржан\",\n      \"lastName\": \"Касымов\",\n      \"role\": \"instructor\",\n      \"status\": \"active\",\n      \"isEmailVerified\": true,\n      \"createdAt\": \"2024-01-10T10:00:00Z\",\n      \"lastLoginAt\": \"2024-03-15T09:00:00Z\"\n    }\n  ],\n  \"total\": 156,\n  \"limit\": 20,\n  \"offset\": 0\n}"
+						}
+					]
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440000"
+								}
+							]
+						},
+						"description": "Get detailed user information"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/users/550e8400-e29b-41d4-a716-446655440000",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"550e8400-e29b-41d4-a716-446655440000"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"email\": \"aliya@example.com\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"role\": \"student\",\n  \"phone\": \"+7 777 123 4567\",\n  \"profilePhotoUrl\": \"https://cdn.example.com/photos/user123.jpg\",\n  \"status\": \"active\",\n  \"isEmailVerified\": true,\n  \"createdAt\": \"2024-01-15T10:00:00Z\",\n  \"updatedAt\": \"2024-03-15T10:00:00Z\",\n  \"lastLoginAt\": \"2024-03-15T08:30:00Z\",\n  \"enrolledCourses\": [\n    {\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"enrolledAt\": \"2024-01-16T10:00:00Z\"\n    },\n    {\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440023\",\n      \"courseName\": \"React Advanced\",\n      \"enrolledAt\": \"2024-02-01T10:00:00Z\"\n    }\n  ]\n}"
+						},
+						{
+							"name": "Error - User Not Found - 404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/users/non-existent-id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"non-existent-id"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"User not found\",\n  \"statusCode\": 404\n}"
+						}
+					]
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"inactive\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440000"
+								}
+							]
+						},
+						"description": "Update user information (status, role, etc.)"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"inactive\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/users/550e8400-e29b-41d4-a716-446655440000",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"550e8400-e29b-41d4-a716-446655440000"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"email\": \"aliya@example.com\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"role\": \"student\",\n  \"status\": \"inactive\",\n  \"updatedAt\": \"2024-03-15T10:00:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Enroll Student in Courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseIds\": [\n    \"880e8400-e29b-41d4-a716-446655440022\",\n    \"880e8400-e29b-41d4-a716-446655440023\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users/:userId/enroll",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								":userId",
+								"enroll"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440000"
+								}
+							]
+						},
+						"description": "Enroll student in multiple courses"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"courseIds\": [\n    \"880e8400-e29b-41d4-a716-446655440022\",\n    \"880e8400-e29b-41d4-a716-446655440023\"\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/users/550e8400-e29b-41d4-a716-446655440000/enroll",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"550e8400-e29b-41d4-a716-446655440000",
+										"enroll"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"enrolled\": [\n    {\n      \"id\": \"990e8400-e29b-41d4-a716-446655440033\",\n      \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"enrolledAt\": \"2024-03-15T10:00:00Z\"\n    },\n    {\n      \"id\": \"990e8400-e29b-41d4-a716-446655440034\",\n      \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440023\",\n      \"courseName\": \"React Advanced\",\n      \"enrolledAt\": \"2024-03-15T10:00:00Z\"\n    }\n  ],\n  \"paymentsCreated\": 6\n}"
+						},
+						{
+							"name": "Error - Not a Student - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"courseIds\": [\"880e8400-e29b-41d4-a716-446655440022\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/users/instructor-id/enroll",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"instructor-id",
+										"enroll"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"User is not a student\",\n  \"statusCode\": 400\n}"
+						},
+						{
+							"name": "Error - Already Enrolled - 409",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"courseIds\": [\"880e8400-e29b-41d4-a716-446655440022\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/users/550e8400-e29b-41d4-a716-446655440000/enroll",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"550e8400-e29b-41d4-a716-446655440000",
+										"enroll"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"Student already enrolled in some courses\",\n  \"statusCode\": 409,\n  \"alreadyEnrolledIn\": [\"880e8400-e29b-41d4-a716-446655440022\"]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Admin Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"dashboard"
+							]
+						},
+						"description": "Get admin dashboard statistics"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/dashboard",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"dashboard"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"totalUsers\": 156,\n  \"newUsersThisMonth\": 12,\n  \"activeCourses\": 8,\n  \"totalRevenue\": 2450000,\n  \"usersByRole\": {\n    \"admin\": 3,\n    \"instructor\": 5,\n    \"student\": 148\n  },\n  \"recentRegistrations\": [\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"firstName\": \"Алия\",\n      \"lastName\": \"Смагулова\",\n      \"email\": \"aliya@example.com\",\n      \"role\": \"student\",\n      \"createdAt\": \"2024-03-15T10:00:00Z\"\n    },\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440011\",\n      \"firstName\": \"Нуржан\",\n      \"lastName\": \"Касымов\",\n      \"email\": \"nurzhan@example.com\",\n      \"role\": \"student\",\n      \"createdAt\": \"2024-03-14T10:00:00Z\"\n    }\n  ],\n  \"systemActivity\": {\n    \"activeUsersPercent\": 87,\n    \"courseOccupancyPercent\": 92,\n    \"paidInvoicesPercent\": 78\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "Admin endpoints for managing users, invitations, and system overview"
+		},
+		{
+			"name": "Admin - Payment Management",
+			"item": [
+				{
+					"name": "Get Payment Rules",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/payment-rules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"payment-rules"
+							]
+						},
+						"description": "Get all payment rules for courses"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/payment-rules",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"payment-rules"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"rules\": [\n    {\n      \"id\": \"aa0e8400-e29b-41d4-a716-446655440044\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"amount\": 50000,\n      \"dueDay\": 10,\n      \"isActive\": true,\n      \"createdAt\": \"2024-01-01T10:00:00Z\",\n      \"updatedAt\": \"2024-03-01T10:00:00Z\"\n    },\n    {\n      \"id\": \"aa0e8400-e29b-41d4-a716-446655440045\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440023\",\n      \"courseName\": \"React Advanced\",\n      \"amount\": 60000,\n      \"dueDay\": 15,\n      \"isActive\": true,\n      \"createdAt\": \"2024-01-01T10:00:00Z\",\n      \"updatedAt\": \"2024-02-01T10:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Payment Rule",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('payment_rule_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440024\",\n  \"amount\": 50000,\n  \"dueDay\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/payment-rules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"payment-rules"
+							]
+						},
+						"description": "Create payment rule for a course"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440024\",\n  \"amount\": 50000,\n  \"dueDay\": 10\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/payment-rules",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"payment-rules"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"aa0e8400-e29b-41d4-a716-446655440046\",\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440024\",\n  \"courseName\": \"Node.js Backend\",\n  \"amount\": 50000,\n  \"dueDay\": 10,\n  \"isActive\": true,\n  \"createdAt\": \"2024-03-15T10:00:00Z\"\n}"
+						},
+						{
+							"name": "Error - Course Not Found - 404",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"courseId\": \"non-existent-course-id\",\n  \"amount\": 50000,\n  \"dueDay\": 10\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/payment-rules",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"payment-rules"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"Course not found\",\n  \"statusCode\": 404\n}"
+						},
+						{
+							"name": "Error - Rule Already Exists - 409",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n  \"amount\": 50000,\n  \"dueDay\": 10\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/payment-rules",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"payment-rules"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"Payment rule already exists for this course\",\n  \"statusCode\": 409\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Payment Rule",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 55000,\n  \"dueDay\": 15,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/payment-rules/:ruleId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"payment-rules",
+								":ruleId"
+							],
+							"variable": [
+								{
+									"key": "ruleId",
+									"value": "aa0e8400-e29b-41d4-a716-446655440044"
+								}
+							]
+						},
+						"description": "Update payment rule"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"amount\": 55000,\n  \"dueDay\": 15\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/payment-rules/aa0e8400-e29b-41d4-a716-446655440044",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"payment-rules",
+										"aa0e8400-e29b-41d4-a716-446655440044"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"aa0e8400-e29b-41d4-a716-446655440044\",\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n  \"courseName\": \"JavaScript Fundamentals\",\n  \"amount\": 55000,\n  \"dueDay\": 15,\n  \"isActive\": true,\n  \"updatedAt\": \"2024-03-15T10:00:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Payment Rule",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/payment-rules/:ruleId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"payment-rules",
+								":ruleId"
+							],
+							"variable": [
+								{
+									"key": "ruleId",
+									"value": "aa0e8400-e29b-41d4-a716-446655440044"
+								}
+							]
+						},
+						"description": "Delete payment rule"
+					},
+					"response": [
+						{
+							"name": "Success - 204",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/payment-rules/aa0e8400-e29b-41d4-a716-446655440044",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"payment-rules",
+										"aa0e8400-e29b-41d4-a716-446655440044"
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "plain",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Get All Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/payments?status=paid&courseId=&month=3&year=2024&limit=50&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"payments"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "paid",
+									"description": "pending | paid | overdue"
+								},
+								{
+									"key": "courseId",
+									"value": ""
+								},
+								{
+									"key": "month",
+									"value": "3",
+									"description": "1-12"
+								},
+								{
+									"key": "year",
+									"value": "2024"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Get all payments with filters (for reporting)"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/admin/payments?month=3&year=2024&limit=50&offset=0",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"admin",
+										"payments"
+									],
+									"query": [
+										{
+											"key": "month",
+											"value": "3"
+										},
+										{
+											"key": "year",
+											"value": "2024"
+										},
+										{
+											"key": "limit",
+											"value": "50"
+										},
+										{
+											"key": "offset",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"payments\": [\n    {\n      \"id\": \"bb0e8400-e29b-41d4-a716-446655440055\",\n      \"student\": {\n        \"id\": \"990e8400-e29b-41d4-a716-446655440033\",\n        \"firstName\": \"Алия\",\n        \"lastName\": \"Смагулова\",\n        \"email\": \"aliya@example.com\"\n      },\n      \"course\": {\n        \"id\": \"880e8400-e29b-41d4-a716-446655440022\",\n        \"name\": \"JavaScript Fundamentals\"\n      },\n      \"amount\": 50000,\n      \"month\": 3,\n      \"year\": 2024,\n      \"dueDate\": \"2024-03-10\",\n      \"status\": \"paid\",\n      \"paidAt\": \"2024-03-08T14:30:00Z\",\n      \"paymentMethod\": \"kaspi_pay\",\n      \"createdAt\": \"2024-03-01T00:00:00Z\"\n    },\n    {\n      \"id\": \"bb0e8400-e29b-41d4-a716-446655440056\",\n      \"student\": {\n        \"id\": \"990e8400-e29b-41d4-a716-446655440034\",\n        \"firstName\": \"Нуржан\",\n        \"lastName\": \"Касымов\",\n        \"email\": \"nurzhan@example.com\"\n      },\n      \"course\": {\n        \"id\": \"880e8400-e29b-41d4-a716-446655440023\",\n        \"name\": \"React Advanced\"\n      },\n      \"amount\": 60000,\n      \"month\": 3,\n      \"year\": 2024,\n      \"dueDate\": \"2024-03-15\",\n      \"status\": \"pending\",\n      \"paidAt\": null,\n      \"paymentMethod\": null,\n      \"createdAt\": \"2024-03-01T00:00:00Z\"\n    }\n  ],\n  \"total\": 450,\n  \"totalAmount\": 22500000,\n  \"paidAmount\": 17550000,\n  \"unpaidAmount\": 4950000,\n  \"limit\": 50,\n  \"offset\": 0\n}"
+						}
+					]
+				}
+			],
+			"description": "Admin endpoints for managing payment rules and viewing payment reports"
+		},
+		{
+			"name": "Instructor - Course Management",
+			"item": [
+				{
+					"name": "Get Instructor Courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/courses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"courses"
+							]
+						},
+						"description": "Get list of instructor's courses"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/courses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"courses"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"courses\": [\n    {\n      \"id\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"name\": \"JavaScript Fundamentals\",\n      \"description\": \"Основы JavaScript для начинающих\",\n      \"startDate\": \"2024-01-15\",\n      \"status\": \"active\",\n      \"studentCount\": 25,\n      \"lessonCount\": 12,\n      \"createdAt\": \"2024-01-01T10:00:00Z\"\n    },\n    {\n      \"id\": \"880e8400-e29b-41d4-a716-446655440023\",\n      \"name\": \"React Advanced\",\n      \"description\": \"Продвинутый React\",\n      \"startDate\": \"2024-02-01\",\n      \"status\": \"active\",\n      \"studentCount\": 18,\n      \"lessonCount\": 8,\n      \"createdAt\": \"2024-01-15T10:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Course",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('course_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Node.js Backend\",\n  \"description\": \"Backend разработка на Node.js\",\n  \"startDate\": \"2024-04-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/instructor/courses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"courses"
+							]
+						},
+						"description": "Create new course"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Node.js Backend\",\n  \"description\": \"Backend разработка на Node.js\",\n  \"startDate\": \"2024-04-01\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/courses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"courses"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"880e8400-e29b-41d4-a716-446655440024\",\n  \"name\": \"Node.js Backend\",\n  \"description\": \"Backend разработка на Node.js\",\n  \"instructorId\": \"550e8400-e29b-41d4-a716-446655440011\",\n  \"startDate\": \"2024-04-01\",\n  \"status\": \"draft\",\n  \"studentCount\": 0,\n  \"lessonCount\": 0,\n  \"createdAt\": \"2024-03-15T10:00:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Course by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/courses/:courseId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"courses",
+								":courseId"
+							],
+							"variable": [
+								{
+									"key": "courseId",
+									"value": "{{course_id}}"
+								}
+							]
+						},
+						"description": "Get course details with students"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/courses/880e8400-e29b-41d4-a716-446655440022",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"courses",
+										"880e8400-e29b-41d4-a716-446655440022"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"880e8400-e29b-41d4-a716-446655440022\",\n  \"name\": \"JavaScript Fundamentals\",\n  \"description\": \"Основы JavaScript для начинающих\",\n  \"instructorId\": \"550e8400-e29b-41d4-a716-446655440011\",\n  \"startDate\": \"2024-01-15\",\n  \"status\": \"active\",\n  \"studentCount\": 25,\n  \"lessonCount\": 12,\n  \"createdAt\": \"2024-01-01T10:00:00Z\",\n  \"students\": [\n    {\n      \"id\": \"990e8400-e29b-41d4-a716-446655440033\",\n      \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"firstName\": \"Алия\",\n      \"lastName\": \"Смагулова\",\n      \"email\": \"aliya@example.com\",\n      \"averageGrade\": 87,\n      \"attendanceRate\": 95,\n      \"homeworkCompletionRate\": 80,\n      \"enrolledAt\": \"2024-01-16T10:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Instructor Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"dashboard"
+							]
+						},
+						"description": "Get instructor dashboard statistics"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/dashboard",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"dashboard"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"activeCourses\": 3,\n  \"totalStudents\": 75,\n  \"lessonsThisMonth\": 18,\n  \"gradedHomework\": 42,\n  \"upcomingLessons\": [\n    {\n      \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"title\": \"Переменные и типы данных\",\n      \"scheduledAt\": \"2024-03-20T14:00:00Z\",\n      \"studentCount\": 25\n    }\n  ],\n  \"pendingHomework\": [\n    {\n      \"id\": \"dd0e8400-e29b-41d4-a716-446655440077\",\n      \"homework\": {\n        \"id\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n        \"title\": \"ДЗ #1: Калькулятор\"\n      },\n      \"student\": {\n        \"firstName\": \"Нуржан\",\n        \"lastName\": \"Касымов\"\n      },\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"submittedAt\": \"2024-03-18T20:00:00Z\",\n      \"isLate\": true\n    }\n  ]\n}"
+						}
+					]
+				}
+			],
+			"description": "Instructor endpoints for course management"
+		},
+		{
+			"name": "Instructor - Lesson Management",
+			"item": [
+				{
+					"name": "Get Course Lessons",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/courses/:courseId/lessons?from=2024-03-01&to=2024-03-31&status=scheduled",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"courses",
+								":courseId",
+								"lessons"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2024-03-01",
+									"description": "ISO date"
+								},
+								{
+									"key": "to",
+									"value": "2024-03-31",
+									"description": "ISO date"
+								},
+								{
+									"key": "status",
+									"value": "scheduled",
+									"description": "scheduled | completed | cancelled"
+								}
+							],
+							"variable": [
+								{
+									"key": "courseId",
+									"value": "{{course_id}}"
+								}
+							]
+						},
+						"description": "Get lessons for a specific course"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/courses/880e8400-e29b-41d4-a716-446655440022/lessons",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"courses",
+										"880e8400-e29b-41d4-a716-446655440022",
+										"lessons"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"lessons\": [\n    {\n      \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"title\": \"Введение в JavaScript\",\n      \"description\": \"Первое занятие курса\",\n      \"date\": \"2024-03-15\",\n      \"time\": \"14:00\",\n      \"scheduledAt\": \"2024-03-15T14:00:00Z\",\n      \"recordingUrl\": null,\n      \"status\": \"scheduled\",\n      \"materialsCount\": 2,\n      \"hasHomework\": true,\n      \"attendanceCount\": 0,\n      \"totalStudents\": 25,\n      \"createdAt\": \"2024-03-10T10:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Lesson",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('lesson_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Переменные и типы данных\",\n  \"description\": \"Изучаем let, const, var и типы данных\",\n  \"date\": \"2024-03-20\",\n  \"time\": \"14:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/instructor/courses/:courseId/lessons",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"courses",
+								":courseId",
+								"lessons"
+							],
+							"variable": [
+								{
+									"key": "courseId",
+									"value": "{{course_id}}"
+								}
+							]
+						},
+						"description": "Create a new lesson for course"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Переменные и типы данных\",\n  \"description\": \"Изучаем let, const, var и типы данных\",\n  \"date\": \"2024-03-20\",\n  \"time\": \"14:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/courses/880e8400-e29b-41d4-a716-446655440022/lessons",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"courses",
+										"880e8400-e29b-41d4-a716-446655440022",
+										"lessons"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"cc0e8400-e29b-41d4-a716-446655440067\",\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n  \"title\": \"Переменные и типы данных\",\n  \"description\": \"Изучаем let, const, var и типы данных\",\n  \"date\": \"2024-03-20\",\n  \"time\": \"14:00\",\n  \"scheduledAt\": \"2024-03-20T14:00:00Z\",\n  \"status\": \"scheduled\",\n  \"createdAt\": \"2024-03-15T10:00:00Z\"\n}"
+						},
+						{
+							"name": "Error - Conflict - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Переменные и типы данных\",\n  \"description\": \"Изучаем let, const, var и типы данных\",\n  \"date\": \"2024-03-20\",\n  \"time\": \"14:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/courses/880e8400-e29b-41d4-a716-446655440022/lessons",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"courses",
+										"880e8400-e29b-41d4-a716-446655440022",
+										"lessons"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Lesson conflicts with another lesson (within 2 hours)\",\n  \"statusCode\": 400,\n  \"conflictingLesson\": {\n    \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n    \"title\": \"Введение в JavaScript\",\n    \"scheduledAt\": \"2024-03-20T13:00:00Z\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Lesson Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/lessons/:lessonId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"lessons",
+								":lessonId"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "{{lesson_id}}"
+								}
+							]
+						},
+						"description": "Get lesson details with materials, homework, and attendance"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/lessons/cc0e8400-e29b-41d4-a716-446655440066",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n  \"courseName\": \"JavaScript Fundamentals\",\n  \"title\": \"Переменные и типы данных\",\n  \"description\": \"Изучаем let, const, var и типы данных\",\n  \"date\": \"2024-03-20\",\n  \"time\": \"14:00\",\n  \"scheduledAt\": \"2024-03-20T14:00:00Z\",\n  \"recordingUrl\": \"https://zoom.us/rec/123456\",\n  \"status\": \"completed\",\n  \"materials\": [\n    {\n      \"id\": \"ff0e8400-e29b-41d4-a716-446655440099\",\n      \"name\": \"Презентация.pdf\",\n      \"fileUrl\": \"https://cdn.example.com/materials/lesson1.pdf\",\n      \"fileType\": \"pdf\",\n      \"fileSize\": 2048576,\n      \"uploadedAt\": \"2024-03-20T12:00:00Z\"\n    }\n  ],\n  \"homework\": {\n    \"id\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n    \"title\": \"ДЗ #1: Калькулятор\",\n    \"description\": \"Создайте простой калькулятор на JavaScript\",\n    \"taskFileUrl\": \"https://cdn.example.com/homework/task1.pdf\",\n    \"deadline\": \"2024-03-23T23:59:59Z\",\n    \"submissionsCount\": 20,\n    \"gradedCount\": 15,\n    \"pendingCount\": 5\n  },\n  \"attendance\": [\n    {\n      \"id\": \"gg0e8400-e29b-41d4-a716-446655440111\",\n      \"studentId\": \"990e8400-e29b-41d4-a716-446655440033\",\n      \"student\": {\n        \"firstName\": \"Алия\",\n        \"lastName\": \"Смагулова\"\n      },\n      \"status\": \"present\",\n      \"markedAt\": \"2024-03-20T15:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Lesson",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recordingUrl\": \"https://zoom.us/rec/123456\",\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/instructor/lessons/:lessonId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"lessons",
+								":lessonId"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "{{lesson_id}}"
+								}
+							]
+						},
+						"description": "Update lesson (add recording URL, change status, etc.)"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"recordingUrl\": \"https://zoom.us/rec/123456\",\n  \"status\": \"completed\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/lessons/cc0e8400-e29b-41d4-a716-446655440066",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n  \"title\": \"Переменные и типы данных\",\n  \"recordingUrl\": \"https://zoom.us/rec/123456\",\n  \"status\": \"completed\",\n  \"updatedAt\": \"2024-03-20T16:00:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Upload Materials",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/instructor/lessons/:lessonId/materials",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"lessons",
+								":lessonId",
+								"materials"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "{{lesson_id}}"
+								}
+							]
+						},
+						"description": "Upload materials (PDF, DOCX) to lesson"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "files[]",
+											"type": "file",
+											"src": "presentation.pdf"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/lessons/cc0e8400-e29b-41d4-a716-446655440066/materials",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066",
+										"materials"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"materials\": [\n    {\n      \"id\": \"ff0e8400-e29b-41d4-a716-446655440099\",\n      \"lessonId\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"name\": \"Презентация.pdf\",\n      \"fileUrl\": \"https://cdn.example.com/materials/lesson1_presentation.pdf\",\n      \"fileType\": \"pdf\",\n      \"fileSize\": 2048576,\n      \"uploadedAt\": \"2024-03-15T10:00:00Z\"\n    }\n  ]\n}"
+						},
+						{
+							"name": "Error - Invalid File - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "files[]",
+											"type": "file",
+											"src": "file.exe"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/lessons/cc0e8400-e29b-41d4-a716-446655440066/materials",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066",
+										"materials"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Invalid file type. Only PDF and DOCX allowed.\",\n  \"statusCode\": 400\n}"
+						},
+						{
+							"name": "Error - File Too Large - 413",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "files[]",
+											"type": "file",
+											"src": "large_file.pdf"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/lessons/cc0e8400-e29b-41d4-a716-446655440066/materials",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066",
+										"materials"
+									]
+								}
+							},
+							"status": "Payload Too Large",
+							"code": 413,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Payload Too Large\",\n  \"message\": \"File too large. Maximum size is 50MB.\",\n  \"statusCode\": 413\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Homework",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('homework_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "ДЗ #1: Калькулятор",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Создайте простой калькулятор на JavaScript",
+									"type": "text"
+								},
+								{
+									"key": "deadline",
+									"value": "2024-03-23T23:59:59Z",
+									"type": "text"
+								},
+								{
+									"key": "taskFile",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/instructor/lessons/:lessonId/homework",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"lessons",
+								":lessonId",
+								"homework"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "{{lesson_id}}"
+								}
+							]
+						},
+						"description": "Create homework for lesson"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title",
+											"value": "ДЗ #1: Калькулятор",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "Создайте простой калькулятор на JavaScript",
+											"type": "text"
+										},
+										{
+											"key": "deadline",
+											"value": "2024-03-23T23:59:59Z",
+											"type": "text"
+										},
+										{
+											"key": "taskFile",
+											"type": "file",
+											"src": "task.pdf"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/lessons/cc0e8400-e29b-41d4-a716-446655440066/homework",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066",
+										"homework"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n  \"lessonId\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n  \"title\": \"ДЗ #1: Калькулятор\",\n  \"description\": \"Создайте простой калькулятор на JavaScript\",\n  \"taskFileUrl\": \"https://cdn.example.com/homework/task1.pdf\",\n  \"deadline\": \"2024-03-23T23:59:59Z\",\n  \"createdAt\": \"2024-03-15T10:00:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Mark Attendance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"attendance\": [\n    {\n      \"studentId\": \"990e8400-e29b-41d4-a716-446655440033\",\n      \"status\": \"present\"\n    },\n    {\n      \"studentId\": \"990e8400-e29b-41d4-a716-446655440034\",\n      \"status\": \"absent\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/instructor/lessons/:lessonId/attendance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"lessons",
+								":lessonId",
+								"attendance"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "{{lesson_id}}"
+								}
+							]
+						},
+						"description": "Mark attendance for students"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"attendance\": [\n    {\n      \"studentId\": \"990e8400-e29b-41d4-a716-446655440033\",\n      \"status\": \"present\"\n    },\n    {\n      \"studentId\": \"990e8400-e29b-41d4-a716-446655440034\",\n      \"status\": \"absent\"\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/lessons/cc0e8400-e29b-41d4-a716-446655440066/attendance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066",
+										"attendance"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"updated\": 2,\n  \"attendance\": [\n    {\n      \"id\": \"gg0e8400-e29b-41d4-a716-446655440111\",\n      \"lessonId\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"studentId\": \"990e8400-e29b-41d4-a716-446655440033\",\n      \"status\": \"present\",\n      \"markedAt\": \"2024-03-15T15:00:00Z\",\n      \"markedBy\": \"550e8400-e29b-41d4-a716-446655440011\"\n    },\n    {\n      \"id\": \"gg0e8400-e29b-41d4-a716-446655440112\",\n      \"lessonId\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"studentId\": \"990e8400-e29b-41d4-a716-446655440034\",\n      \"status\": \"absent\",\n      \"markedAt\": \"2024-03-15T15:00:00Z\",\n      \"markedBy\": \"550e8400-e29b-41d4-a716-446655440011\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Homework Submissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/homework/:homeworkId/submissions?status=pending&isLate=false",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"homework",
+								":homeworkId",
+								"submissions"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "graded | pending"
+								},
+								{
+									"key": "isLate",
+									"value": "false"
+								}
+							],
+							"variable": [
+								{
+									"key": "homeworkId",
+									"value": "{{homework_id}}"
+								}
+							]
+						},
+						"description": "Get all submissions for homework"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/homework/ee0e8400-e29b-41d4-a716-446655440088/submissions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"homework",
+										"ee0e8400-e29b-41d4-a716-446655440088",
+										"submissions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"homework\": {\n    \"id\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n    \"title\": \"ДЗ #1: Калькулятор\",\n    \"deadline\": \"2024-03-23T23:59:59Z\"\n  },\n  \"submissions\": [\n    {\n      \"id\": \"dd0e8400-e29b-41d4-a716-446655440077\",\n      \"homeworkId\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n      \"student\": {\n        \"id\": \"990e8400-e29b-41d4-a716-446655440033\",\n        \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n        \"firstName\": \"Алия\",\n        \"lastName\": \"Смагулова\"\n      },\n      \"githubUrl\": \"https://github.com/aliya/js-calculator\",\n      \"submittedAt\": \"2024-03-22T18:30:00Z\",\n      \"isLate\": false,\n      \"grade\": 90,\n      \"feedback\": \"Отличная работа! Код чистый и читаемый.\",\n      \"gradedAt\": \"2024-03-23T10:00:00Z\",\n      \"gradedBy\": \"550e8400-e29b-41d4-a716-446655440011\"\n    }\n  ],\n  \"total\": 25,\n  \"graded\": 20,\n  \"pending\": 5\n}"
+						}
+					]
+				},
+				{
+					"name": "Grade Homework",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"grade\": 90,\n  \"feedback\": \"Отличная работа! Код чистый и читаемый.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/instructor/submissions/:submissionId/grade",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"submissions",
+								":submissionId",
+								"grade"
+							],
+							"variable": [
+								{
+									"key": "submissionId",
+									"value": "dd0e8400-e29b-41d4-a716-446655440077"
+								}
+							]
+						},
+						"description": "Grade homework submission"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"grade\": 90,\n  \"feedback\": \"Отличная работа! Код чистый и читаемый.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/submissions/dd0e8400-e29b-41d4-a716-446655440077/grade",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"submissions",
+										"dd0e8400-e29b-41d4-a716-446655440077",
+										"grade"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"dd0e8400-e29b-41d4-a716-446655440077\",\n  \"homeworkId\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n  \"studentId\": \"990e8400-e29b-41d4-a716-446655440033\",\n  \"grade\": 90,\n  \"feedback\": \"Отличная работа! Код чистый и читаемый.\",\n  \"gradedAt\": \"2024-03-23T10:00:00Z\",\n  \"gradedBy\": \"550e8400-e29b-41d4-a716-446655440011\",\n  \"updatedAt\": \"2024-03-23T10:00:00Z\"\n}"
+						},
+						{
+							"name": "Error - Invalid Grade - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"grade\": 150,\n  \"feedback\": \"Отличная работа!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/instructor/submissions/dd0e8400-e29b-41d4-a716-446655440077/grade",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"submissions",
+										"dd0e8400-e29b-41d4-a716-446655440077",
+										"grade"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Grade must be between 0 and 100\",\n  \"statusCode\": 400\n}"
+						}
+					]
+				}
+			],
+			"description": "Instructor endpoints for lesson and homework management"
+		},
+		{
+			"name": "Student - Dashboard & Calendar",
+			"item": [
+				{
+					"name": "Get Student Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"student",
+								"dashboard"
+							]
+						},
+						"description": "Get student dashboard statistics"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/student/dashboard",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"dashboard"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"enrolledCourses\": 2,\n  \"upcomingLessons\": 3,\n  \"averageGrade\": 87,\n  \"activeHomework\": 2,\n  \"upcomingLessonsList\": [\n    {\n      \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"title\": \"Переменные и типы данных\",\n      \"scheduledAt\": \"2024-03-20T14:00:00Z\",\n      \"hasHomework\": true\n    }\n  ],\n  \"recentGrades\": [\n    {\n      \"homeworkId\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n      \"homeworkTitle\": \"ДЗ #1: Калькулятор\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"grade\": 90,\n      \"gradedAt\": \"2024-03-18T10:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Student Calendar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/calendar?from=2024-03-01&to=2024-03-31&courseId=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"student",
+								"calendar"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2024-03-01",
+									"description": "ISO date"
+								},
+								{
+									"key": "to",
+									"value": "2024-03-31",
+									"description": "ISO date"
+								},
+								{
+									"key": "courseId",
+									"value": "",
+									"description": "Filter by course"
+								}
+							]
+						},
+						"description": "Get student's lesson calendar"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/student/calendar",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"calendar"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"lessons\": [\n    {\n      \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"title\": \"Переменные и типы данных\",\n      \"description\": \"Изучаем let, const, var\",\n      \"date\": \"2024-03-20\",\n      \"time\": \"14:00\",\n      \"scheduledAt\": \"2024-03-20T14:00:00Z\",\n      \"status\": \"scheduled\",\n      \"hasHomework\": true\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Lesson Details (Student)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/lessons/:lessonId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"student",
+								"lessons",
+								":lessonId"
+							],
+							"variable": [
+								{
+									"key": "lessonId",
+									"value": "{{lesson_id}}"
+								}
+							]
+						},
+						"description": "Get lesson details for student (with materials, homework, attendance)"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/student/lessons/cc0e8400-e29b-41d4-a716-446655440066",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"lessons",
+										"cc0e8400-e29b-41d4-a716-446655440066"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n  \"courseName\": \"JavaScript Fundamentals\",\n  \"title\": \"Переменные и типы данных\",\n  \"description\": \"Изучаем let, const, var\",\n  \"date\": \"2024-03-20\",\n  \"time\": \"14:00\",\n  \"scheduledAt\": \"2024-03-20T14:00:00Z\",\n  \"recordingUrl\": \"https://zoom.us/rec/123456\",\n  \"materials\": [\n    {\n      \"id\": \"ff0e8400-e29b-41d4-a716-446655440099\",\n      \"name\": \"Презентация.pdf\",\n      \"fileUrl\": \"https://cdn.example.com/materials/lesson1.pdf\",\n      \"fileType\": \"pdf\",\n      \"fileSize\": 2048576\n    }\n  ],\n  \"homework\": {\n    \"id\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n    \"title\": \"ДЗ #1: Калькулятор\",\n    \"description\": \"Создайте простой калькулятор\",\n    \"taskFileUrl\": \"https://cdn.example.com/homework/task1.pdf\",\n    \"deadline\": \"2024-03-23T23:59:59Z\",\n    \"mySubmission\": {\n      \"id\": \"dd0e8400-e29b-41d4-a716-446655440077\",\n      \"githubUrl\": \"https://github.com/aliya/js-calculator\",\n      \"submittedAt\": \"2024-03-22T18:30:00Z\",\n      \"isLate\": false,\n      \"grade\": 90,\n      \"feedback\": \"Отличная работа!\",\n      \"gradedAt\": \"2024-03-23T10:00:00Z\"\n    }\n  },\n  \"myAttendance\": {\n    \"status\": \"present\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Submit Homework",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"githubUrl\": \"https://github.com/aliya/js-calculator\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/student/homework/:homeworkId/submit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"student",
+								"homework",
+								":homeworkId",
+								"submit"
+							],
+							"variable": [
+								{
+									"key": "homeworkId",
+									"value": "{{homework_id}}"
+								}
+							]
+						},
+						"description": "Submit homework with GitHub URL"
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"githubUrl\": \"https://github.com/aliya/js-calculator\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/student/homework/ee0e8400-e29b-41d4-a716-446655440088/submit",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"homework",
+										"ee0e8400-e29b-41d4-a716-446655440088",
+										"submit"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"dd0e8400-e29b-41d4-a716-446655440077\",\n  \"homeworkId\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n  \"studentId\": \"990e8400-e29b-41d4-a716-446655440033\",\n  \"githubUrl\": \"https://github.com/aliya/js-calculator\",\n  \"submittedAt\": \"2024-03-22T18:30:00Z\",\n  \"isLate\": false,\n  \"createdAt\": \"2024-03-22T18:30:00Z\"\n}"
+						},
+						{
+							"name": "Error - Invalid URL - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"githubUrl\": \"not-a-github-url\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/student/homework/ee0e8400-e29b-41d4-a716-446655440088/submit",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"homework",
+										"ee0e8400-e29b-41d4-a716-446655440088",
+										"submit"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Invalid GitHub URL\",\n  \"statusCode\": 400\n}"
+						},
+						{
+							"name": "Error - Already Submitted - 409",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"githubUrl\": \"https://github.com/aliya/js-calculator\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/student/homework/ee0e8400-e29b-41d4-a716-446655440088/submit",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"homework",
+										"ee0e8400-e29b-41d4-a716-446655440088",
+										"submit"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"Already submitted. Use PATCH to update.\",\n  \"statusCode\": 409\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Student Grades",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/grades?courseId=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"student",
+								"grades"
+							],
+							"query": [
+								{
+									"key": "courseId",
+									"value": "",
+									"description": "Filter by course"
+								}
+							]
+						},
+						"description": "Get all grades for student"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/student/grades",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"grades"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"overallAverage\": 87,\n  \"trend\": \"up\",\n  \"courses\": [\n    {\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"instructor\": {\n        \"firstName\": \"Нуржан\",\n        \"lastName\": \"Касымов\"\n      },\n      \"averageGrade\": 87,\n      \"totalHomework\": 10,\n      \"gradedHomework\": 8,\n      \"grades\": [\n        {\n          \"homeworkId\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n          \"homeworkTitle\": \"ДЗ #1: Калькулятор\",\n          \"lessonTitle\": \"Переменные и типы данных\",\n          \"submittedAt\": \"2024-03-22T18:30:00Z\",\n          \"grade\": 90,\n          \"feedback\": \"Отличная работа!\",\n          \"gradedAt\": \"2024-03-23T10:00:00Z\"\n        }\n      ]\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Student Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/payments?status=&year=2024",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"student",
+								"payments"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "",
+									"description": "pending | paid | overdue"
+								},
+								{
+									"key": "year",
+									"value": "2024"
+								}
+							]
+						},
+						"description": "Get student payment history"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/student/payments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"payments"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"summary\": {\n    \"totalPaid\": 150000,\n    \"totalUnpaid\": 50000,\n    \"totalPayments\": 4\n  },\n  \"payments\": [\n    {\n      \"id\": \"bb0e8400-e29b-41d4-a716-446655440055\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"amount\": 50000,\n      \"month\": 3,\n      \"year\": 2024,\n      \"monthName\": \"Март\",\n      \"dueDate\": \"2024-03-10\",\n      \"status\": \"paid\",\n      \"paidAt\": \"2024-03-08T14:30:00Z\",\n      \"paymentMethod\": \"kaspi_pay\"\n    }\n  ],\n  \"byYear\": {\n    \"2024\": [\n      {\n        \"id\": \"bb0e8400-e29b-41d4-a716-446655440055\",\n        \"courseName\": \"JavaScript Fundamentals\",\n        \"amount\": 50000,\n        \"monthName\": \"Январь\",\n        \"dueDate\": \"2024-01-10\",\n        \"status\": \"paid\",\n        \"paidAt\": \"2024-01-08T10:00:00Z\"\n      }\n    ]\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Initiate Payment (Kaspi Pay)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/payments/:paymentId/pay",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"student",
+								"payments",
+								":paymentId",
+								"pay"
+							],
+							"variable": [
+								{
+									"key": "paymentId",
+									"value": "bb0e8400-e29b-41d4-a716-446655440055"
+								}
+							]
+						},
+						"description": "Initiate payment via Kaspi Pay"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/student/payments/bb0e8400-e29b-41d4-a716-446655440055/pay",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"student",
+										"payments",
+										"bb0e8400-e29b-41d4-a716-446655440055",
+										"pay"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"kaspiPayUrl\": \"https://kaspi.kz/pay?invoice=abc123xyz\",\n  \"invoiceId\": \"abc123xyz\",\n  \"amount\": 50000,\n  \"expiresAt\": \"2024-03-15T12:00:00Z\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Student endpoints for dashboard, calendar, grades, and payments"
+		},
+		{
+			"name": "Instructor - Student Management",
+			"item": [
+				{
+					"name": "Get All Students",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/students?courseId=&search=&sortBy=averageGrade&order=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"students"
+							],
+							"query": [
+								{
+									"key": "courseId",
+									"value": "",
+									"description": "Filter by course"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by name or email"
+								},
+								{
+									"key": "sortBy",
+									"value": "averageGrade",
+									"description": "averageGrade | attendanceRate | homeworkCompletionRate"
+								},
+								{
+									"key": "order",
+									"value": "desc",
+									"description": "asc | desc"
+								}
+							]
+						},
+						"description": "Get list of instructor's students with performance metrics"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/students",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"students"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"students\": [\n    {\n      \"id\": \"990e8400-e29b-41d4-a716-446655440033\",\n      \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"firstName\": \"Алия\",\n      \"lastName\": \"Смагулова\",\n      \"email\": \"aliya@example.com\",\n      \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n      \"courseName\": \"JavaScript Fundamentals\",\n      \"averageGrade\": 87,\n      \"attendanceRate\": 95,\n      \"homeworkCompletionRate\": 80,\n      \"enrolledAt\": \"2024-01-16T10:00:00Z\"\n    }\n  ],\n  \"total\": 148\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Student Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instructor/students/:studentId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instructor",
+								"students",
+								":studentId"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "990e8400-e29b-41d4-a716-446655440033"
+								}
+							]
+						},
+						"description": "Get detailed student performance with lesson-by-lesson breakdown"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/instructor/students/990e8400-e29b-41d4-a716-446655440033",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"instructor",
+										"students",
+										"990e8400-e29b-41d4-a716-446655440033"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"990e8400-e29b-41d4-a716-446655440033\",\n  \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"email\": \"aliya@example.com\",\n  \"profilePhotoUrl\": \"https://cdn.example.com/photos/user123.jpg\",\n  \"courseId\": \"880e8400-e29b-41d4-a716-446655440022\",\n  \"courseName\": \"JavaScript Fundamentals\",\n  \"averageGrade\": 87,\n  \"attendanceRate\": 95,\n  \"homeworkCompletionRate\": 80,\n  \"enrolledAt\": \"2024-01-16T10:00:00Z\",\n  \"performance\": [\n    {\n      \"lessonId\": \"cc0e8400-e29b-41d4-a716-446655440066\",\n      \"lessonTitle\": \"Введение в JavaScript\",\n      \"lessonDate\": \"2024-03-15\",\n      \"attendance\": {\n        \"status\": \"present\"\n      },\n      \"homework\": {\n        \"id\": \"ee0e8400-e29b-41d4-a716-446655440088\",\n        \"title\": \"ДЗ #1: Калькулятор\",\n        \"deadline\": \"2024-03-18T23:59:59Z\",\n        \"submission\": {\n          \"id\": \"dd0e8400-e29b-41d4-a716-446655440077\",\n          \"githubUrl\": \"https://github.com/aliya/js-calculator\",\n          \"submittedAt\": \"2024-03-17T18:30:00Z\",\n          \"isLate\": false,\n          \"grade\": 90,\n          \"feedback\": \"Отличная работа!\",\n          \"gradedAt\": \"2024-03-18T10:00:00Z\"\n        }\n      }\n    }\n  ]\n}"
+						}
+					]
+				}
+			],
+			"description": "Instructor endpoints for managing and viewing student performance"
+		},
+		{
+			"name": "User Profile",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						},
+						"description": "Get current user profile"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"email\": \"student@example.com\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"role\": \"student\",\n  \"phone\": \"+7 777 123 4567\",\n  \"bio\": \"Изучаю программирование\",\n  \"profilePhotoUrl\": \"https://cdn.example.com/photos/user123.jpg\",\n  \"status\": \"active\",\n  \"isEmailVerified\": true,\n  \"createdAt\": \"2024-01-15T10:00:00Z\",\n  \"lastLoginAt\": \"2024-03-15T08:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"phone\": \"+7 777 123 4567\",\n  \"bio\": \"Изучаю программирование и веб-разработку\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						},
+						"description": "Update user profile information"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"phone\": \"+7 777 123 4567\",\n  \"bio\": \"Изучаю программирование и веб-разработку\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"firstName\": \"Алия\",\n  \"lastName\": \"Смагулова\",\n  \"phone\": \"+7 777 123 4567\",\n  \"bio\": \"Изучаю программирование и веб-разработку\",\n  \"updatedAt\": \"2024-03-15T10:00:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Upload Profile Photo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "photo",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/profile/photo",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile",
+								"photo"
+							]
+						},
+						"description": "Upload profile photo (JPG, PNG)"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "photo",
+											"type": "file",
+											"src": "avatar.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/profile/photo",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile",
+										"photo"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"profilePhotoUrl\": \"https://cdn.example.com/photos/user123_new.jpg\",\n  \"updatedAt\": \"2024-03-15T10:00:00Z\"\n}"
+						},
+						{
+							"name": "Error - Invalid File Type - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "photo",
+											"type": "file",
+											"src": "document.pdf"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/profile/photo",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile",
+										"photo"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Invalid file type. Only JPG and PNG allowed.\",\n  \"statusCode\": 400\n}"
+						},
+						{
+							"name": "Error - File Too Large - 413",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "photo",
+											"type": "file",
+											"src": "large_photo.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/profile/photo",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile",
+										"photo"
+									]
+								}
+							},
+							"status": "Payload Too Large",
+							"code": 413,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Payload Too Large\",\n  \"message\": \"File too large. Maximum size is 5MB.\",\n  \"statusCode\": 413\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Profile Photo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/profile/photo",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile",
+								"photo"
+							]
+						},
+						"description": "Delete profile photo"
+					},
+					"response": [
+						{
+							"name": "Success - 204",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/profile/photo",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile",
+										"photo"
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "plain",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"description": "User profile management endpoints"
+		},
+		{
+			"name": "File Downloads",
+			"item": [
+				{
+					"name": "Download Material",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/files/materials/:materialId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"files",
+								"materials",
+								":materialId"
+							],
+							"variable": [
+								{
+									"key": "materialId",
+									"value": "ff0e8400-e29b-41d4-a716-446655440099"
+								}
+							]
+						},
+						"description": "Download lesson material file"
+					},
+					"response": [
+						{
+							"name": "Success - 200 (Binary File)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/files/materials/ff0e8400-e29b-41d4-a716-446655440099",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"materials",
+										"ff0e8400-e29b-41d4-a716-446655440099"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/pdf"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "attachment; filename=\"Презентация.pdf\""
+								}
+							],
+							"cookie": [],
+							"body": "<Binary PDF file stream>"
+						},
+						{
+							"name": "Error - Access Denied - 403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/files/materials/ff0e8400-e29b-41d4-a716-446655440099",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"materials",
+										"ff0e8400-e29b-41d4-a716-446655440099"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Forbidden\",\n  \"message\": \"Access denied. Not enrolled in this course.\",\n  \"statusCode\": 403\n}"
+						},
+						{
+							"name": "Error - Not Found - 404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/files/materials/non-existent-id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"materials",
+										"non-existent-id"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"Material not found\",\n  \"statusCode\": 404\n}"
+						}
+					]
+				},
+				{
+					"name": "Download Homework Task",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/files/homework/:homeworkId/task",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"files",
+								"homework",
+								":homeworkId",
+								"task"
+							],
+							"variable": [
+								{
+									"key": "homeworkId",
+									"value": "{{homework_id}}"
+								}
+							]
+						},
+						"description": "Download homework task file"
+					},
+					"response": [
+						{
+							"name": "Success - 200 (Binary File)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/files/homework/ee0e8400-e29b-41d4-a716-446655440088/task",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"homework",
+										"ee0e8400-e29b-41d4-a716-446655440088",
+										"task"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/pdf"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "attachment; filename=\"task.pdf\""
+								}
+							],
+							"cookie": [],
+							"body": "<Binary PDF file stream>"
+						},
+						{
+							"name": "Error - Access Denied - 403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/files/homework/ee0e8400-e29b-41d4-a716-446655440088/task",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"homework",
+										"ee0e8400-e29b-41d4-a716-446655440088",
+										"task"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Forbidden\",\n  \"message\": \"Access denied\",\n  \"statusCode\": 403\n}"
+						},
+						{
+							"name": "Error - Not Found - 404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/files/homework/non-existent-id/task",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"homework",
+										"non-existent-id",
+										"task"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"Homework task file not found\",\n  \"statusCode\": 404\n}"
+						}
+					]
+				}
+			],
+			"description": "File download endpoints for materials and homework tasks"
+		},
+		{
+			"name": "Webhooks",
+			"item": [
+				{
+					"name": "Kaspi Pay Confirmation",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Kaspi-Signature",
+								"value": "hmac_sha256_signature",
+								"description": "HMAC SHA256 signature for verification"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"invoiceId\": \"abc123xyz\",\n  \"transactionId\": \"kaspi_tx_987654\",\n  \"amount\": 50000,\n  \"status\": \"success\",\n  \"paidAt\": \"2024-03-08T14:30:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/webhooks/kaspi-pay/confirm",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"webhooks",
+								"kaspi-pay",
+								"confirm"
+							]
+						},
+						"description": "Kaspi Pay webhook for payment confirmation"
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Kaspi-Signature",
+										"value": "valid_signature"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"invoiceId\": \"abc123xyz\",\n  \"transactionId\": \"kaspi_tx_987654\",\n  \"amount\": 50000,\n  \"status\": \"success\",\n  \"paidAt\": \"2024-03-08T14:30:00Z\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/webhooks/kaspi-pay/confirm",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"webhooks",
+										"kaspi-pay",
+										"confirm"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true\n}"
+						},
+						{
+							"name": "Error - Invalid Signature - 401",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Kaspi-Signature",
+										"value": "invalid_signature"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"invoiceId\": \"abc123xyz\",\n  \"transactionId\": \"kaspi_tx_987654\",\n  \"amount\": 50000,\n  \"status\": \"success\",\n  \"paidAt\": \"2024-03-08T14:30:00Z\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/webhooks/kaspi-pay/confirm",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"webhooks",
+										"kaspi-pay",
+										"confirm"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Invalid signature\",\n  \"statusCode\": 401\n}"
+						},
+						{
+							"name": "Error - Amount Mismatch - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Kaspi-Signature",
+										"value": "valid_signature"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"invoiceId\": \"abc123xyz\",\n  \"transactionId\": \"kaspi_tx_987654\",\n  \"amount\": 60000,\n  \"status\": \"success\",\n  \"paidAt\": \"2024-03-08T14:30:00Z\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/webhooks/kaspi-pay/confirm",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"webhooks",
+										"kaspi-pay",
+										"confirm"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Amount mismatch\",\n  \"statusCode\": 400\n}"
+						}
+					]
+				}
+			],
+			"description": "Webhook endpoints for external service integrations"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://api.crm-lms.kz/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invitation_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invitation_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "payment_rule_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "course_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "lesson_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "homework_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

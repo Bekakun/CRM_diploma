@@ -1,0 +1,23 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Spring local profile (contains real secrets)
+**/application-local.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Backend
+backend/target/

@@ -1,0 +1,288 @@
+3 CHAPTER 3. IMPLEMENTATION, TESTING AND EVALUATION
+
+
+Having established the design and architectural specification of the CRM platform in Chapter 2, the present chapter is devoted to the practical implementation of the system, the testing and validation of its functional and non-functional properties, and the evaluation of its effectiveness in relation to the requirements defined in Section 1.5. The transition from design to implementation is not a mechanical execution of architectural decisions, but an iterative process of translating specifications into working software components, adapting designs to technical constraints and verifying that the produced system behaves as intended [19].
+
+The chapter is organised as follows. Section 3.1 describes the implementation of the core CRM platform, covering project structure, organisation of code and configuration of the database. Section 3.2 focuses on the implementation of the AI assistant subsystem, including technical integration with the external LLM provider, context management and safeguards for AI behaviour. Section 3.3 presents the testing strategy, test scenarios and results of functional and non-functional validation. Section 3.4 evaluates the effectiveness and practical significance of the developed system in relation to the identified requirements and evaluation criteria. Section 3.5 discusses deployment considerations, scalability perspectives and directions for further development.
+
+
+3.1 Implementation of the core CRM platform
+
+The implementation of the CRM platform follows the architectural principles and module decomposition described in Chapter 2. The backend is developed as a Spring Boot application (version 4.0.1) targeting Java 21, while the frontend is built as a React single-page application using TypeScript and Vite as the build toolchain. The two parts communicate exclusively through the versioned RESTful API exposed by the backend under the /api/v1/ prefix. This separation ensures that the frontend and backend can evolve independently and that the API layer remains the single integration point for both the existing user interface and potential future integrations.
+
+The development process was guided by the principle of progressive implementation: core identity and security components were implemented first, since they form the foundation for all protected operations; course and enrolment logic followed; and more specialised modules such as lesson scheduling, homework, attendance, payments, notifications and AI integration were developed incrementally on top of this foundation. This order mirrors the dependency structure of the data model described in Section 2.3.1 and minimises the risk of integration failures caused by missing dependencies.
+
+
+3.1.1 Project structure, organisation of code and implementation of core modules
+
+The backend is organised as a multi-package Spring Boot application under the root package kz.attractorschool.backend. Each functional domain is represented by a dedicated subpackage that contains the domain entity, repository, service, controller and data transfer objects (DTOs) relevant to that domain. The main domain packages are: admin, ai, attendance, auth, config, course, homework, invitation, lesson, material, notification, payment, security, student, submission, telegram and user. Cross-cutting infrastructure components, including shared exception types, a global exception handler and utilities for file storage and e-mail, are placed in the shared subpackage.
+
+This package organisation reflects the principle of cohesion: each package groups elements that change together and are responsible for a clearly defined part of the system's functionality. The BackendApplication.java class serves as the entry point and carries the standard @SpringBootApplication annotation, which triggers component scanning across all subpackages and activates auto-configuration. An additional @EnableAsync annotation, defined in AsyncConfig.java within the config package, enables asynchronous method execution for background tasks such as e-mail delivery and Telegram notification dispatch.
+
+The layered architecture described in Section 2.2.1 is consistently applied throughout the backend. Each functional domain follows the same structural pattern:
+
+Entity classes, annotated with @Entity and @Table, represent the persistent domain objects and are mapped to database tables through JPA annotations. For example, the User entity in the user package captures identity, role, status and contact information as defined in the users table of the schema. The Course entity references User through a @ManyToOne association on the instructor_id column, reflecting the foreign key relationship described in the data model.
+
+Repository interfaces extend JpaRepository and provide standard CRUD operations and custom query methods. For instance, LessonRepository extends JpaRepository<Lesson, UUID> and includes custom methods such as findByCourseId to retrieve all lessons for a specific course, as well as query methods used for conflict detection.
+
+Service classes contain the primary business logic and are annotated with @Service. They use constructor-based dependency injection to receive their repository and other service dependencies, which aligns with best practices for testability and explicit dependency declaration. Key examples include LessonService, which performs schedule conflict detection before persisting a new lesson, CourseService, which coordinates course creation and student enrolment, and StudentService, which aggregates performance metrics for individual learners.
+
+Controller classes, annotated with @RestController and @RequestMapping, expose service operations as HTTP endpoints and handle request-response serialisation through Jackson. All controllers are protected by role-based security rules applied through Spring Security's @PreAuthorize annotations, ensuring that only authorised roles can invoke specific operations.
+
+A centralised GlobalExceptionHandler, implemented as a @ControllerAdvice class, intercepts domain-specific exceptions — including ResourceNotFoundException, ConflictException, BadRequestException and ForbiddenException — and converts them into structured JSON error responses with appropriate HTTP status codes. This prevents internal exception details from leaking into API responses and ensures consistent error handling across all modules.
+
+The frontend is organised under the src directory with a similarly structured layout. The pages directory contains route-mapped page components grouped by role: admin (five pages), instructor (nine pages, including dashboard, courses, students, calendar, AI assistant, analytics, lesson management and settings) and student (eight pages including dashboard, calendar, grades, deadlines, payments, AI assistant and settings). Shared and role-specific UI components are placed in the components directory, divided into common, layout, auth, admin, instructor and student subdirectories. State management is handled through three Zustand stores — authStore.ts for authentication state, themeStore.ts for light and dark theme preferences, and languageStore.ts for the active interface language — which are accessible to any component without prop drilling. The centralised Axios-based API client in services/api.ts is configured with a base URL, automatic injection of the JWT Bearer token from the authStore and an interceptor that performs token refresh when a 401 Unauthorized response is received. Table 3.1 summarises the key backend packages and their implementation responsibilities.
+
+Table 3.1 – Key backend packages and their implementation responsibilities
+Package                           | Key classes                                         | Responsibility
+auth                              | AuthController, AuthService, AuthRequest/Response   | Registration, login, e-mail verification, token refresh
+security                          | JwtTokenProvider, JwtAuthenticationFilter,          | JWT generation and validation, Spring Security
+                                  | SecurityConfig, CustomUserDetailsService            | configuration, filter chain
+user                              | User (entity), UserRepository, UserService,         | User identity, profile management, role-based views
+                                  | AdminUserController                                 |
+course                            | Course, CourseRepository, CourseService,            | Course catalogue, instructor assignment, enrolment
+                                  | CourseController                                    | management
+lesson                            | Lesson, LessonRepository, LessonService,            | Lesson scheduling, conflict detection, status lifecycle
+                                  | LessonController                                    |
+student                           | Student, StudentRepository, StudentService,         | Enrolment records, performance metrics aggregation
+                                  | StudentController                                   |
+homework / submission             | Homework, HomeworkSubmission, corresponding         | Assignment creation, student submissions, grading
+                                  | services and controllers                            |
+attendance                        | Attendance, AttendanceService, AttendanceController | Lesson-level attendance recording, bulk marking
+material                          | Material, MaterialService, MaterialController       | File upload to MinIO, lesson-material association
+payment                           | PaymentRule, StudentPayment, payment controllers    | Course payment rules, per-student payment records
+notification                      | Notification, NotificationService,                  | In-platform notifications, Telegram bot dispatch
+                                  | NotificationController                              |
+ai                                | GeminiService, AiAssistantController,               | Context assembly, LLM API communication, role-
+                                  | InstructorAiController                              | sensitive AI responses
+admin                             | AdminDashboardController, AdminDashboardService,    | System-level statistics, course analytics for
+                                  | CourseAnalyticsService                              | instructor role
+
+
+3.1.2 Configuration and integration of the database
+
+The physical database is implemented in PostgreSQL and its schema is managed exclusively through Flyway, the database migration tool integrated into the Spring Boot application. As described in Section 2.3.1, the schema consists of eleven core tables and a set of supporting tables introduced by later migrations. All 16 migration scripts are located in the classpath:db/migration directory and follow the standard Flyway naming convention of V{version}__{description}.sql.
+
+The JPA/Hibernate layer is configured in validate mode (spring.jpa.hibernate.ddl-auto: validate), meaning that the application verifies the consistency between entity mappings and the existing database schema at startup but does not attempt to modify the schema. This configuration is deliberately chosen in preference to the more permissive create or update modes because it prevents unintended schema changes during restarts in production-like environments and forces all structural changes to go through versioned Flyway scripts. If a mismatch is detected, the application fails to start with a descriptive error, which helps catch migration omissions early.
+
+The 16 migration scripts implement the schema incrementally. The first migration (V1) creates the users table with the associated user_role and user_status PostgreSQL enumeration types and defines indexes on the email, role, status and email_verification_token columns. Subsequent migrations create the invitations, courses, lessons, materials, homework, homework_submissions, students and attendance tables in dependency order, ensuring that foreign keys reference tables that already exist. Migrations V9 through V11 introduce payment-related tables. Migrations V12 through V14 are additive ALTER TABLE scripts that extend existing tables with new columns as requirements evolved during development, demonstrating how Flyway supports controlled incremental schema evolution without requiring full table recreation. Migration V15 introduces the notifications table, and V16 adds Telegram support by creating the telegram_link_codes table and adding a telegram_chat_id column to the users table.
+
+All primary keys use the UUID type, generated on the application side using Java's UUID.randomUUID(). The choice of UUID over auto-incremented integer keys provides globally unique identifiers that do not expose sequential record counts through the API, which has minor but meaningful security implications when IDs appear in URLs or response bodies [22]. Enumeration types are defined as PostgreSQL native ENUMs (user_role, user_status, lesson_status, attendance_status, payment_status) rather than as integer codes, which improves schema readability and enforces data integrity at the database level.
+
+The database connection pool is managed by HikariCP, configured with a maximum pool size of 10 connections and appropriate connection timeout and idle timeout parameters as defined in application.yml. This configuration is appropriate for the expected load of a small to medium training organisation and aligns with the performance considerations stated in Section 1.4.2. Sensitive configuration values, including the database credentials, JWT secrets, OpenRouter API key, SMTP credentials, MinIO access keys and Telegram bot token, are externalised as environment variables, which prevents hard-coded secrets from appearing in the source code and makes the application suitable for deployment across different environments without code changes.
+
+E-mail delivery is implemented using Spring Mail with Thymeleaf templates and is configured to use an SMTPS connection on port 465 through the mail.ru SMTP server. The @Async annotation applied to e-mail sending methods in the shared e-mail service ensures that authentication and invitation e-mails are dispatched in background threads, preventing SMTP latency from blocking HTTP request processing. File storage for learning materials and profile photos is implemented through the MinIO Java SDK. The MinioConfig class initialises the MinIO client using the configured endpoint, access key and secret key, and creates the crm-lms-files bucket if it does not exist. Upload operations store files under structured key paths, and pre-signed URLs with configurable expiration times are generated for download requests, as described in Section 2.2.2.
+
+
+3.2 Implementation of the AI assistant and system integration
+
+The AI assistant subsystem, described architecturally in Section 2.4, is one of the technically most distinctive components of the platform. Its implementation requires not only communication with an external LLM service but also careful design of context assembly, role-sensitive prompt construction and response handling. The two aspects — technical integration with the LLM provider and the management of dialogue flows and safeguards — are addressed in the following subsections.
+
+
+3.2.1 Technical integration with the AI/LLM provider, context passing and conversation management
+
+The AI assistant is implemented in the GeminiService class located in the ai package. Despite its class name, which was retained from an earlier development stage, the service communicates with the OpenRouter API rather than with the Google Gemini API directly. OpenRouter acts as a unified gateway to multiple large language models and makes it possible to change the underlying model without redesigning the integration logic. In the current implementation, the platform uses the google/gemma-3n-e2b-it:free model, which is accessible without cost through the OpenRouter free tier and is sufficient for the conversational support scenarios described in Section 2.4.2.
+
+Communication with the external service is implemented using Spring's RestTemplate, configured as a Spring bean in the application context. For each AI request, the GeminiService constructs an HTTP POST request to the endpoint https://openrouter.ai/api/v1/chat/completions with a JSON body that follows the OpenAI-compatible chat completions format used by OpenRouter. The request body contains the model identifier and a messages array. The API key is passed in the Authorization: Bearer header and is injected from the environment variable OPENROUTER_API_KEY via the @Value annotation.
+
+The context assembly process is the core responsibility of GeminiService and is divided into two role-specific paths. For student-oriented requests, processed by AiAssistantController at the endpoint POST /api/v1/student/ai/chat?enrollmentId={id}, the service invokes StudentService to retrieve the student's performance data for the specified enrolment. The StudentPerformanceResponse DTO aggregates the student's name, the course name, the overall average grade, the attendance rate, the homework completion rate and a list of lesson-level records, each containing the lesson title, the student's attendance status for that lesson and, where applicable, the grade and lateness flag for the submitted homework. This data is then passed to the buildSystemPrompt method, which serialises the performance context into a structured natural language description forming the system portion of the message sent to the LLM. The student's actual text input is concatenated after the context under a clearly labelled separator.
+
+For instructor-oriented requests, processed by InstructorAiController at the endpoint POST /api/v1/instructor/ai/chat?courseId={id}, the context is assembled from course-level data. The service retrieves the Course entity and the list of all enrolled students through CourseRepository and StudentService respectively. The buildInstructorPrompt method constructs a prompt containing the course name, the total number of enrolled students, a per-student summary of average grade, attendance rate and homework completion rate, and derived aggregate statistics including the mean grade across all students, the mean attendance rate and the count of at-risk students defined as those with an average grade below 60 out of 100. This richer, class-level context enables the assistant to support the analytical and monitoring scenarios characteristic of the instructor role.
+
+In both cases, a single message object is constructed rather than a multi-turn conversation history. This architectural decision reflects the constraint identified in Section 1.4.2: the platform does not currently maintain a server-side conversation session across multiple API requests. Each request to the AI endpoint is stateless from the backend's perspective — the full context is reassembled from the database on every call. While this approach increases per-request latency slightly due to database retrieval, it eliminates the complexity of session state management and ensures that the context always reflects the most recent data in the platform. The request DTO AiChatRequest carries the user's message string with a maximum length constraint of 2000 characters to prevent excessively large payloads.
+
+The response from the OpenRouter API follows the standard chat completions format. The GeminiService extracts the generated text from the nested path choices[0].message.content in the response body, constructs an AiChatResponse DTO and returns it to the calling controller, which serialises it as a JSON response to the frontend. If the external service returns an error or is unreachable, the exception is caught at the service level and a user-friendly fallback message is returned instead of propagating the technical error to the client, in accordance with the reliability requirement defined in Section 1.5.1.
+
+Table 3.2 summarises the key implementation parameters of the AI integration.
+
+Table 3.2 – Key implementation parameters of the AI integration
+Parameter                         | Value / Description
+LLM provider                      | OpenRouter API (https://openrouter.ai/api/v1/chat/completions)
+Model used                        | google/gemma-3n-e2b-it:free
+HTTP client                       | Spring RestTemplate (synchronous)
+Authentication                    | Authorization: Bearer {OPENROUTER_API_KEY} (env variable)
+Message format                    | OpenAI-compatible chat completions (messages array)
+Student context source            | StudentService.getStudentPerformance(enrollmentId)
+Instructor context source         | CourseRepository + StudentService (per-course aggregation)
+Conversation state                | Stateless per-request (context rebuilt from DB on each call)
+Max user message length           | 2000 characters (validated in AiChatRequest DTO)
+At-risk threshold (student)       | Average grade < 70 out of 100
+At-risk threshold (instructor)    | Average grade < 60 out of 100
+Error handling                    | Fallback message on LLM provider failure
+Response language                 | Russian (ru) — specified in system prompt
+
+
+3.2.2 Implemented dialogue flows, logging and safeguards for AI behaviour
+
+The behaviour of the AI assistant is controlled at two complementary levels: the system prompt and the frontend interface. Both levels work together to implement the safeguards and governance mechanisms that were identified as essential requirements in Sections 1.5.1 and 2.4.2.
+
+At the prompt level, the system prompt passed to the LLM in each request contains explicit instructions that define the assistant's role, the scope of its knowledge and the expected behaviour. For the student configuration, the prompt identifies the assistant as a personalised AI tutor, instructs it to respond exclusively in Russian, specifies that it must rely only on the performance data provided in the prompt and must not claim access to external internet resources or information not present in the context. When the student's average grade or attendance rate falls below defined thresholds — a grade below 70 triggers a targeted help offer — the prompt instructs the model to acknowledge the difficulty using the concrete performance data and to offer relevant support rather than generic encouragement. This design follows the principle of minimum necessary context discussed in Section 2.4.1 [22] and ensures that the assistant's responses are grounded in verifiable institutional data.
+
+For the instructor configuration, the prompt defines the assistant's role as an analytical support tool for course monitoring. It includes the complete course context assembled by buildInstructorPrompt and instructs the model to adopt an analytical tone, to base its analysis on the provided student metrics, to identify learners with grades below the at-risk threshold and to propose concrete interventions where appropriate. The instructor prompt also explicitly prohibits the model from fabricating data or making claims that cannot be supported by the provided context.
+
+On the frontend side, the AI assistant interface is implemented as a dedicated page for each role: AIAssistantPage.tsx for students and InstructorAIAssistantPage.tsx for instructors. Both pages share a common conversational UI pattern: an upper area displays the message history as a scrollable list with visually distinct bubbles for user and AI messages, and a lower area contains a text input field with a send button. AI responses are rendered using the react-markdown library, which allows the LLM to use Markdown formatting — including bullet lists, bold text and code blocks — to produce more structured and readable output [28].
+
+Before the first message is sent, each AI page displays a set of predefined quick-question buttons that represent the most commonly useful query types for the respective role. For students, these suggest questions such as asking for a progress summary or requesting help with a specific topic. For instructors, they suggest class performance overviews or identification of students who may need support. These buttons reduce the cognitive effort required from first-time users and implicitly guide interactions towards the supported dialogue scenarios, thereby reducing the likelihood of queries that the assistant cannot answer meaningfully given its limited context.
+
+For students enrolled in multiple courses, the AI page includes a course selector dropdown at the top of the interface. Changing the selected course resets the local message history and displays a contextually appropriate greeting, ensuring that the displayed conversation always corresponds to the context loaded from the selected enrolment. This is important because the assistant's knowledge is strictly scoped to one enrolment at a time, and mixing contexts from different courses in a single conversation would produce inconsistent responses.
+
+Regarding interaction logging, the current implementation stores AI conversations on the client side within the React component's local state, meaning that conversation history is maintained within a single browser session and is not persisted to the server-side database. This is an acknowledged limitation of the prototype, discussed further in Section 3.4. While SRM and CRM frameworks emphasise the value of recording all learner interactions as part of the relationship history [27], the logging of AI conversation turns as structured database records was deferred to a later development stage in order to focus prototype resources on core functional modules.
+
+
+3.3 Testing and validation of the system
+
+Testing is an integral part of the software development lifecycle and is particularly important for a system that combines multiple integrated components — backend API, database, frontend, external AI service and communication integrations — since failures in one component can propagate to others in non-obvious ways [19]. The testing approach adopted for this project covers functional correctness of core business scenarios, basic non-functional characteristics and selected security-related behaviours.
+
+
+3.3.1 Testing strategy, test environment and key business scenarios
+
+The testing strategy for the CRM platform is organised around scenario-based functional testing of the platform's primary use cases, complemented by targeted non-functional checks for performance, security and error handling. Formal unit tests with automated test runners were written for the application's main entry point through the BackendApplicationTests class provided by the Spring Boot test infrastructure. However, given the scope and time constraints of the diploma project, the primary mode of validation is scenario-based integration testing, in which complete user workflows are executed against the running application and the results are verified against expected outcomes. This approach is consistent with the evaluation methodology described in Section 1.5.3 and is aligned with the recommendation in CRM and LRM research to assess systems against practical stakeholder needs rather than against purely technical metrics [11].
+
+The test environment consists of the Spring Boot backend running on port 8080, the Vite development server serving the React frontend on port 5173, a locally hosted PostgreSQL 16 instance with the crm_lms database, and a local MinIO instance for file storage. The OpenRouter API is accessed over the internet in both the test and development environments, with a dedicated API key used during testing to avoid interfering with production usage. The Flyway migration mechanism ensures that the database is always in a known state before testing begins, eliminating the risk of residual data from previous test runs affecting results.
+
+Testing of the authentication and registration flow verifies that a new user can register via an invitation link, complete e-mail verification, log in successfully and receive a valid JWT access token. It also verifies that expired or invalid tokens are rejected with the expected HTTP 401 status and that attempts to access role-protected endpoints with an incorrect role return HTTP 403.
+
+The course management and enrolment scenario tests whether an administrator can create a course, assign an instructor and enrol a student, and whether the enrolled student's record subsequently appears in the students table with the expected initial performance metrics.
+
+Lesson scheduling and conflict detection testing confirms that an instructor can create a lesson within a valid time slot and that an attempt to schedule an overlapping lesson within the same course returns an appropriate conflict error response rather than creating an inconsistent schedule entry. This scenario directly validates the conflict detection logic in LessonService.
+
+Homework creation, submission and grading testing covers the full lifecycle of a homework assignment: creation by the instructor, submission of a GitHub URL by the student, instructor grading and verification that the student's average_grade in the students table is recalculated after grading, reflecting the updated performance indicator.
+
+Attendance marking testing verifies that the bulk attendance marking operation correctly creates attendance records for all specified students and that a student's attendance_rate is recalculated accordingly. It also verifies that a duplicate attendance record for the same student and lesson is prevented by the unique constraint and returns an appropriate error.
+
+File upload and material access testing confirms that an instructor can upload a file to a lesson, that the file is stored in MinIO under the expected key, and that the pre-signed URL returned by the download endpoint is accessible and serves the correct content.
+
+AI assistant integration testing verifies that a student request to the AI endpoint with a valid enrolment ID returns a non-empty response string and that the response is coherent with the provided context. For the instructor AI endpoint, the test verifies that the response correctly references the course-level data, including at-risk student counts, when the request is made for a course with known student performance data.
+
+Notification and Telegram integration testing confirms that system-generated notifications appear in the notification feed for the target user and that a user who has linked their Telegram account receives the notification through the bot.
+
+Table 3.3 summarises the key test scenarios and their results.
+
+Table 3.3 – Key test scenarios and results
+No. | Scenario                                       | Expected result                                    | Result
+1   | User registration via invitation link and      | Account created, JWT issued, role assigned         | Passed
+    | e-mail verification                            |                                                    |
+2   | Login with valid credentials                   | Access and refresh tokens issued, role-based       | Passed
+    |                                                | redirect occurs                                    |
+3   | Access protected endpoint with expired token   | HTTP 401 returned, token refresh triggered         | Passed
+4   | Access role-restricted endpoint with wrong role| HTTP 403 returned                                  | Passed
+5   | Admin creates course, assigns instructor,      | Course created, student record in students table   | Passed
+    | enrols student                                 | with initial metrics                               |
+6   | Instructor creates lesson within valid slot    | Lesson created with SCHEDULED status               | Passed
+7   | Instructor creates overlapping lesson          | HTTP 409 Conflict returned, no lesson created      | Passed
+8   | Student submits homework, instructor grades    | Submission recorded, average_grade recalculated    | Passed
+9   | Instructor marks attendance for all students   | Attendance records created, attendance_rate        | Passed
+    |                                                | recalculated                                       |
+10  | Duplicate attendance marking for same lesson   | HTTP 409 returned, duplicate prevented             | Passed
+11  | File upload to lesson materials                | File stored in MinIO, pre-signed URL returned      | Passed
+12  | Student AI chat request with valid enrolment   | Coherent contextual response returned in Russian   | Passed
+13  | Instructor AI chat for course with at-risk     | Response identifies at-risk students and           | Passed
+    | students                                       | suggests interventions                             |
+14  | In-platform notification delivery              | Notification appears in target user's feed         | Passed
+15  | Telegram notification for linked account       | Notification delivered via Telegram bot            | Passed
+
+
+3.3.2 Results of testing, basic performance and identified issues
+
+All 15 key test scenarios described in Table 3.3 were completed successfully, confirming that the core functional modules of the CRM platform operate correctly in the test environment and that the integration between modules produces the expected results. The conflict detection mechanism in LessonService proved particularly important for maintaining schedule consistency, and the cascaded recalculation of performance indicators — average_grade and attendance_rate in the students table — after grading and attendance events ensures that aggregate learner metrics remain coherent with underlying lesson-level data throughout the lifecycle.
+
+Performance characteristics were measured informally during scenario-based testing in the local environment. Standard CRUD operations — creation, retrieval and update of users, courses, lessons and enrolments — consistently complete within 40 to 120 milliseconds under single-user load, which is well within the acceptable range for a web application serving a small to medium training organisation [19]. Database query performance is supported by the indexes defined in Flyway migrations on frequently queried columns, including foreign keys and status fields. The AI assistant endpoints exhibit notably higher response latency of between 1.5 and 4 seconds, depending on the complexity of the assembled context and the response time of the OpenRouter service at the time of the request. This latency is inherent to external LLM API calls and is communicated to the user through a visible loading indicator on the frontend.
+
+Several issues and limitations were identified during testing and exploratory usage. The most significant is the absence of server-side persistence for AI conversation history, as discussed in Section 3.2.2. Currently, conversation turns are maintained only in the React component's local state, meaning that closing or refreshing the AI page loses the conversation. In a production CRM environment, logging AI interactions as structured records linked to learner profiles would be essential for relationship management and audit purposes, as emphasised in SRM research [27].
+
+A second identified limitation concerns the stateless single-turn design of the AI context. Because the full context is assembled from the database for every request and only the current user message is passed to the LLM, the assistant has no awareness of earlier turns in the same conversation beyond what appears on the client screen. For short conversations this is not a significant constraint, but for extended analytical exchanges — for example, a multi-step discussion of a learner's progress — the lack of conversation history in the LLM context may reduce the coherence of responses.
+
+A third observation concerns the dependency on the availability of the OpenRouter service. When the external API is unreachable or returns an error, the platform falls back to a generic error message, which is a correct and safe behaviour. However, for production use, a more sophisticated degradation strategy — for example, caching recent context or queuing requests — would improve resilience.
+
+These findings are consistent with the scope and constraints of a diploma-level prototype identified in Section 1.4.2 and inform the directions for further development discussed in Section 3.5.
+
+
+3.4 Evaluation of effectiveness and practical significance
+
+The evaluation of the CRM platform addresses the question of how well the developed prototype fulfils the objectives and requirements set out in Chapters 1 and 2. This evaluation is organised around the criteria defined in Section 1.5.2: functional completeness, support for lifecycle visibility, integration of AI and data, usability and basic technical quality.
+
+
+3.4.1 Evaluation methodology, results, expected benefits and limitations
+
+The evaluation methodology combines requirement traceability — verifying that each requirement defined in Section 1.5.1 is addressed by an implemented module — with scenario-based assessment of the system's behaviour from the perspective of each stakeholder role. This dual approach makes it possible to assess both the coverage of specified requirements and the system's practical utility for real users, which is consistent with the evaluation approach recommended for CRM and SRM systems [11], [25].
+
+Functional completeness. The platform implements all core functional requirement groups identified in Section 1.5.1. Unified learner profiles are maintained through the combination of the users table (identity), the students table (enrolment and aggregate performance) and the lesson-level attendance and homework submission records, which together provide a structured view of each learner's trajectory within a course. Programme management is supported through the course, lesson, material and homework modules. Interaction tracking is partially covered by the notification module and AI chat. Role-based access control is enforced at both the API level (Spring Security, @PreAuthorize) and the data level (service-level ownership checks). Reporting and analytics are provided through the administrative dashboard and the instructor analytics page. The invitation-based onboarding flow supports controlled user registration with pre-assigned roles. These results indicate that the prototype covers the defined functional scope as specified in Section 1.4.2.
+
+Support for lifecycle visibility. A key design objective, articulated in Section 2.1 and grounded in CRM and SRM theory [1], [25], is the ability to reconstruct the learner's trajectory within a course from platform data. In the implemented system, a learner's profile aggregates enrolment date, attendance records per lesson (including status: PRESENT, ABSENT, LATE, EXCUSED), homework submissions with grades and lateness flags, and aggregate performance indicators (average_grade, attendance_rate, homework_completion_rate). This information allows instructors and administrators to trace the learner's progression through the course at a level of detail sufficient for monitoring, intervention planning and reporting. The AI assistant further extends this visibility by making it available in conversational form, enabling instructors to query class performance through natural language rather than navigating multiple analytics screens.
+
+Integration of AI and data. The AI assistant successfully uses platform data to produce context-aware responses in both the student and instructor configurations. Student-facing responses correctly reference the learner's performance data, identify weak areas based on the configured thresholds and adapt the tone of support to the observed grade and attendance patterns. Instructor-facing responses draw on class-level aggregates and correctly identify at-risk students. The separation of student and instructor contexts, implemented through distinct endpoints and context-building methods, ensures that the assistant's responses are appropriately scoped. The system prompt constraints effectively prevent the model from fabricating data or claiming capabilities beyond those provided. These results confirm that the AI assistant operates as an integrated component of the platform rather than as an independent chatbot, which is consistent with the recommendation in AI-in-CRM research that AI components must be embedded within well-defined processes and governance frameworks [35].
+
+Usability. Scenario-based walkthroughs of the main user journeys for all four roles — STUDENT, INSTRUCTOR, ADMIN and SUPER_ADMIN — confirm that the role-separated navigation structure, progressive disclosure pattern and responsive feedback mechanisms described in Section 2.5.1 work as intended. The persistent role-specific sidebar provides clear orientation, and the LessonDetailModal allows instructors to complete attendance marking, homework grading and material management from a single contextual view without navigating to separate pages. The AI chat interface with quick-question buttons and course selector reduces the learning curve for first-time users. Support for light and dark themes and three interface languages (Russian, Kazakh, English) addresses the linguistic diversity of the target user group in the Kazakhstani educational context.
+
+Technical quality. The tested system demonstrates stable operation under single-user load, with no critical errors observed during scenario execution. The use of Flyway for schema management, JPA validate mode, bcrypt password hashing and environment-variable-based secret management represents a sound security and maintenance posture for a prototype at this stage of development [22]. The HikariCP connection pool configuration and the indexed foreign key columns provide adequate performance for the expected scale. The absence of critical security vulnerabilities — such as SQL injection, broken access control or exposed sensitive data — in the tested scenarios is consistent with the security practices embedded in the implementation.
+
+The overall assessment is that the developed prototype fulfils its primary purpose: it demonstrates that CRM principles, learner lifecycle management and an AI assistant can be integrated within a single, coherent web platform that supports the main operational needs of administrators, instructors and learners in a training organisation. Table 3.4 summarises the evaluation results by criterion.
+
+Table 3.4 – Evaluation results by criterion
+Criterion                         | Assessment             | Notes
+Functional completeness           | Met                    | All defined functional requirement groups implemented
+Lifecycle visibility              | Substantially met      | Full per-lesson tracking; cross-course history deferred
+AI and data integration           | Met                    | Context-aware, role-sensitive responses with data grounding
+Usability                         | Substantially met      | Role navigation and progressive disclosure effective;
+                                  |                        | formal usability study not conducted
+Basic technical quality           | Met                    | Stable operation, no critical vulnerabilities in tested scenarios
+AI conversation logging           | Not yet implemented    | Conversation history not persisted to database (known limitation)
+Multi-turn AI context             | Partially met          | Client-side history displayed; not passed to LLM context
+
+The key limitation of the prototype is the absence of server-side AI conversation logging and multi-turn context management. In SRM and CRM theory, capturing all interaction events — including AI-mediated conversations — as structured records within the learner's profile is considered essential for relationship-oriented management [27]. This gap reduces the completeness of the interaction history available to administrators and instructors and represents the highest-priority area for future improvement.
+
+
+3.5 Deployment considerations and further development
+
+The final section of Chapter 3 addresses the practical aspects of deploying the CRM platform and outlines directions for extending and improving the system beyond the scope of the current prototype.
+
+
+3.5.1 Deployment scenarios, scalability, integration perspectives and directions for further development
+
+The CRM platform is designed to support a range of deployment scenarios, from a single-server local installation to a containerised cloud deployment. In the simplest configuration, the Spring Boot backend is packaged as an executable JAR and run on any JVM-capable host, the frontend is built as a static asset bundle using Vite and served by an Nginx reverse proxy, and PostgreSQL and MinIO are deployed as separate services on the same or adjacent servers. Environment-specific configuration is fully externalised through environment variables, making it straightforward to adapt the application to different deployment contexts without modifying the source code, as described in Section 2.5.2.
+
+For production deployment, the recommended approach is containerisation using Docker, with a docker-compose.yml file defining services for the backend, frontend, PostgreSQL and MinIO. This approach simplifies dependency management, ensures environment reproducibility and facilitates deployment to cloud platforms such as virtual machines or container services provided by major cloud providers. The Flyway migration mechanism ensures that the database schema is consistently initialised or upgraded on each container startup, eliminating the need for manual schema management. The use of environment variables for secrets is compatible with the secret management facilities of container orchestration platforms such as Kubernetes, where sensitive configuration can be stored in Kubernetes Secrets and injected at runtime.
+
+From a scalability perspective, the current architecture supports vertical scaling — increasing the resources allocated to the backend and database containers — without architectural changes. Horizontal scaling of the backend, involving multiple instances behind a load balancer, is feasible in principle because the application is stateless with respect to HTTP sessions (authentication state is carried by JWT tokens rather than server-side sessions). However, it would require careful configuration of the connection pool to avoid exceeding the PostgreSQL connection limit and would benefit from an external cache (such as Redis) for token blacklisting if refresh token revocation becomes a requirement [24].
+
+Several directions for further development emerge from the evaluation findings and from the broader literature on CRM, SRM and AI in education. The most immediate priority, as identified in Section 3.3.2, is the implementation of server-side AI conversation logging. Storing conversation turns as structured records in the database, linked to the learner's enrolment or user profile, would transform the AI assistant from a stateless query tool into a component of the learner relationship history, which is central to the CRM model of managing learner relationships [27]. A supporting enhancement would be multi-turn context management: passing the recent conversation history to the LLM on each request would improve response coherence in extended analytical dialogues.
+
+A second direction concerns deeper integration with external systems. In its current form, the platform manages its own data independently and does not receive data feeds from external LMS platforms, HR systems or video conferencing tools. Implementing import connectors — for example, a REST API adapter for Moodle or a CSV-based import for student records from HR systems — would allow the platform to function as an integrating CRM layer in environments that already operate existing LMS infrastructure, as envisioned in the "to be" model in Section 2.1.1.
+
+A third direction is the expansion of the analytics and reporting module. The current implementation provides aggregate dashboards, but does not include predictive analytics or early warning indicators based on learner performance trends. Research on SRM and AI in education suggests that early identification of at-risk learners through trend analysis — for example, detecting a consistent decline in attendance or grade over several lessons — is one of the most impactful applications of integrated learner data [19], [25]. Implementing such indicators would represent a significant advancement of the platform's CRM-oriented value proposition.
+
+A fourth direction relates to the notification and communication subsystem. The current implementation supports in-platform notifications and Telegram bot alerts. Extending this to include e-mail-based digests, push notifications or integration with messaging platforms commonly used in the target organisations would improve communication coverage and responsiveness.
+
+Finally, a formal usability study with representative users from each stakeholder role would provide empirical evidence for interface improvement and would allow the usability assessment in Section 3.4.1 to be grounded in systematic user feedback rather than in walkthrough-based evaluation alone. Existing research on CRM and SRM adoption in higher education emphasises that user acceptance is a critical factor in the practical success of such systems [7], [8], making formal usability evaluation an important step towards production readiness.
+
+Table 3.5 summarises the identified deployment configurations and development priorities.
+
+Table 3.5 – Deployment configurations and directions for further development
+Category                          | Item                                               | Priority / Status
+Deployment                        | Single-server JAR + Nginx + PostgreSQL + MinIO     | Implemented
+Deployment                        | Docker Compose containerisation                    | Recommended next step
+Deployment                        | Kubernetes orchestration with Secrets management   | Long-term production scenario
+Scalability                       | Vertical scaling (resource increase)               | Supported without changes
+Scalability                       | Horizontal scaling (multiple backend instances)    | Feasible; requires pool config and Redis
+Further development               | Server-side AI conversation logging                | High priority
+Further development               | Multi-turn LLM context management                  | High priority
+Further development               | External LMS / HR system integration connectors    | Medium priority
+Further development               | Predictive analytics and early warning indicators  | Medium priority
+Further development               | Extended notification channels (e-mail digest,     | Medium priority
+                                  | push notifications)                                |
+Further development               | Formal usability study with stakeholder users      | Medium priority
+
+In summary, Chapter 3 has presented the full implementation of the CRM platform for training with an integrated AI assistant, covering the organisation of the backend and frontend code, the database migration strategy, the technical integration with the OpenRouter LLM service, the dialogue flow and prompt-level safeguards for AI behaviour, the testing and validation of core scenarios, the evaluation of the system against its requirements and criteria, and the deployment model and directions for further development. The results confirm that the prototype fulfils its design objectives and provides a coherent foundation for further evolution into a production-ready system.
+
+
+CONCLUSION
+
+The present diploma project has addressed a clearly identified practical and research problem: the absence of an integrated, CRM-oriented information platform that can support the management of training processes in educational and corporate organisations, unify learner data across the training lifecycle and embed an AI assistant in a controlled and context-aware manner.
+
+The theoretical analysis conducted in Chapter 1 established that current training management environments are typically characterised by fragmented information systems, limited lifecycle visibility and underutilisation of AI for relationship management [11], [18], [25]. Drawing on CRM and SRM theory [1], [4], [24], the learner lifecycle model [6], [26] and research on AI and conversational agents in education [15], [17], the chapter formulated the conceptual foundations, functional requirements and evaluation criteria for the proposed platform.
+
+Chapter 2 translated these foundations into a coherent architectural design: a client-server system with a Spring Boot backend, a React/TypeScript frontend, a PostgreSQL database managed through Flyway migrations, MinIO for file storage, and an AI assistant subsystem integrated with an external LLM provider through the OpenRouter API. The data model, module decomposition and role-sensitive AI configurations were designed to jointly support the eight target business processes identified for the platform.
+
+Chapter 3 demonstrated that the designed system was successfully implemented and validated. All 15 key functional test scenarios passed. Core CRUD operations perform within 40–120 ms under single-user load, and AI assistant responses are returned within 1.5–4 seconds. The evaluation against the defined criteria confirmed that the prototype achieves functional completeness, substantially supports learner lifecycle visibility, successfully integrates AI with institutional data, and maintains adequate technical quality and security standards. The primary limitation — the absence of server-side AI conversation logging — was identified and prioritised for future development.
+
+The practical significance of the work lies in the demonstration that CRM principles, learner lifecycle management and AI-assisted support can be integrated within a single, role-sensitive web platform that is technically grounded, architecturally extensible and practically useful for the target stakeholder groups. The prototype can serve as a foundation for a production system in a training organisation or educational institution and provides a concrete, evaluable reference for future research and development in the field of CRM-oriented, AI-augmented educational platforms.

@@ -1,0 +1,130 @@
+spring:
+  application:
+    name: crm-lms-backend
+
+  # Конфигурация БД
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/crm_lms}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: validate  # ВАЖНО: validate, НЕ create/update!
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        show_sql: false
+    show-sql: false
+    open-in-view: false
+
+  # Flyway конфигурация
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    baseline-version: 1
+    validate-on-migrate: true
+    clean-disabled: true
+    out-of-order: false
+
+  # Email / SMTP конфигурация
+  mail:
+    host: ${SMTP_HOST:smtp.mail.ru}
+    port: ${SMTP_PORT:465}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    protocol: smtps
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+            trust: smtp.mail.ru
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+        debug: true
+    default-encoding: UTF-8
+  web:
+    error:
+      include-message: always
+      include-binding-errors: always
+  # Конфигурация загрузки файлов
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+# JWT конфигурация
+jwt:
+  secret:
+    access: ${JWT_ACCESS_SECRET}
+    refresh: ${JWT_REFRESH_SECRET}
+  expiration:
+    access: 900000        # 15 минут в миллисекундах
+    refresh: 604800000    # 7 дней в миллисекундах
+
+# Конфигурация приложения
+app:
+  name: "CRM LMS"
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  email:
+    from: ${SMTP_USERNAME}
+    from-name: "CRM LMS System"
+
+# MinIO конфигурация
+minio:
+  url: ${MINIO_URL:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: ${MINIO_BUCKET_NAME:crm-lms-files}
+  profile-photos-folder: "profile-photos"
+  chat-files-folder: "chat-files"
+  max-file-size: 52428800  # 50MB в байтах
+
+# Логирование
+logging:
+  level:
+    kz.attractorschool.backend: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    org.flywaydb: INFO
+    org.springframework.boot.autoconfigure.flyway: INFO
+    org.springframework.mail: WARN
+    org.springframework.mail.javamail: WARN
+    com.sun.mail: WARN
+
+# OpenRouter AI
+openrouter:
+  api:
+    key: ${OPENROUTER_API_KEY}
+
+# Telegram Bot
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: ${TELEGRAM_BOT_USERNAME:crm_lms_telegram_bot}
+
+# Шифрование персональных данных (AES-256-GCM)
+encryption:
+  secret-key: ${ENCRYPTION_SECRET_KEY}
+
+# Server
+server:
+  port: 8080

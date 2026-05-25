@@ -198,7 +198,7 @@ export default function Sidebar({ open, onClose }: Props) {
                         hover:bg-gray-50/80 dark:hover:bg-white/[0.04]
                         transition-all duration-200 cursor-pointer group"
         >
-          <div className={`relative w-9 h-9 rounded-xl bg-gradient-to-br ${accent}
+          <div className={`relative w-9 h-9 rounded-full bg-gradient-to-br ${accent}
                           flex items-center justify-center overflow-hidden shrink-0
                           shadow-md ring-2 ring-white/50 dark:ring-gray-900/50`}>
             {user?.profilePhotoUrl ? (

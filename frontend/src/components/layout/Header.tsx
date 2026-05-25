@@ -298,7 +298,7 @@ export default function Header({ onMenuClick }: Props) {
             <button
               onClick={() => navigate(getSettingsPath())}
               title={t('nav.settings')}
-              className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600
                           flex items-center justify-center overflow-hidden shadow-sm ring-2
                           ring-primary-200/50 dark:ring-primary-900/50 shrink-0
                           hover:ring-primary-400/60 dark:hover:ring-primary-600/60

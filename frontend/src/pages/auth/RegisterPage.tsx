@@ -30,6 +30,8 @@ export default function RegisterPage() {
   const [error, setError]                   = useState('')
   const [step, setStep]                     = useState<'register' | 'verify'>('register')
   const [verificationCode, setVerificationCode] = useState('')
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([])
   const [submitLoading, setSubmitLoading]   = useState(false)
   const [verifyLoading, setVerifyLoading]   = useState(false)
 
@@ -266,7 +268,7 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <form onSubmit={handleVerify} className="space-y-4">
+              <form onSubmit={handleVerify} className="space-y-5">
                 {error && (
                   <div className="flex items-start gap-2.5 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-100">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
@@ -274,25 +276,67 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-gray-700">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 text-center">
                     {t('auth.verificationCode')}
                   </label>
-                  <input
-                    type="text"
-                    value={verificationCode}
-                    onChange={e => setVerificationCode(e.target.value)}
-                    className="input-field text-center text-3xl tracking-[0.5em] font-bold"
-                    placeholder="000000"
-                    maxLength={6}
-                    required
-                    autoFocus
-                  />
+                  {/* OTP boxes */}
+                  <div className="flex justify-center gap-2.5">
+                    {otpDigits.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={el => { otpRefs.current[idx] = el }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        autoFocus={idx === 0}
+                        onChange={e => {
+                          const val = e.target.value.replace(/\D/g, '')
+                          if (!val) return
+                          const newDigits = [...otpDigits]
+                          newDigits[idx] = val[val.length - 1]
+                          setOtpDigits(newDigits)
+                          setVerificationCode(newDigits.join(''))
+                          if (idx < 5) otpRefs.current[idx + 1]?.focus()
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Backspace') {
+                            e.preventDefault()
+                            const newDigits = [...otpDigits]
+                            if (newDigits[idx]) {
+                              newDigits[idx] = ''
+                            } else if (idx > 0) {
+                              newDigits[idx - 1] = ''
+                              otpRefs.current[idx - 1]?.focus()
+                            }
+                            setOtpDigits(newDigits)
+                            setVerificationCode(newDigits.join(''))
+                          }
+                        }}
+                        onPaste={e => {
+                          e.preventDefault()
+                          const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+                          const newDigits = [...otpDigits]
+                          for (let i = 0; i < pasted.length; i++) newDigits[i] = pasted[i]
+                          setOtpDigits(newDigits)
+                          setVerificationCode(newDigits.join(''))
+                          const nextFocus = Math.min(pasted.length, 5)
+                          otpRefs.current[nextFocus]?.focus()
+                        }}
+                        className="w-11 h-14 text-center text-2xl font-bold rounded-xl border-2
+                                   border-gray-200 bg-white text-gray-900
+                                   focus:border-primary-500 focus:ring-2 focus:ring-primary-100
+                                   outline-none transition-all duration-150
+                                   shadow-sm hover:border-gray-300"
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={verifyLoading}
+                  disabled={verifyLoading || verificationCode.length < 6}
                   className="btn-primary w-full py-3"
                 >
                   {verifyLoading ? (
@@ -448,7 +492,7 @@ export default function RegisterPage() {
               )}
 
               {/* Name row */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium text-gray-700">
                     {t('common.firstName')} <span className="text-red-500">*</span>
@@ -528,7 +572,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Passwords row */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium text-gray-700">
                     {t('common.password')} <span className="text-red-500">*</span>

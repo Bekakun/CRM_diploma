@@ -39,26 +39,21 @@ spring:
 
   # Email / SMTP конфигурация
   mail:
-    host: ${SMTP_HOST:smtp.mail.ru}
-    port: ${SMTP_PORT:465}
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
     username: ${SMTP_USERNAME}
     password: ${SMTP_PASSWORD}
-    protocol: smtps
     properties:
       mail:
         smtp:
           auth: true
-          ssl:
+          starttls:
             enable: true
-            trust: smtp.mail.ru
-          socketFactory:
-            port: 465
-            class: javax.net.ssl.SSLSocketFactory
-            fallback: false
+            required: true
           connectiontimeout: 10000
           timeout: 10000
           writetimeout: 10000
-        debug: true
+        debug: false
     default-encoding: UTF-8
   web:
     error:

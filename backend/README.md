@@ -153,7 +153,7 @@ curl -X GET http://localhost:8080/api/v1/users/me \
 
 ```
 backend/
-├── src/main/java/kz/attractorschool/backend/
+├── src/main/java/kz/iitu/backend/
 │   ├── auth/              # Аутентификация и авторизация
 │   ├── config/            # Конфигурации Spring
 │   ├── invitation/        # Система приглашений
@@ -291,7 +291,7 @@ Email отправляются асинхронно в фоновом режим
 ```yaml
 logging:
   level:
-    kz.attractorschool.backend: DEBUG
+    kz.iitu.backend: DEBUG
     org.hibernate.SQL: DEBUG
 ```
 

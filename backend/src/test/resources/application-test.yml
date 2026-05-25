@@ -67,5 +67,5 @@ telegram:
 
 logging:
   level:
-    kz.attractorschool.backend: WARN
+    kz.iitu.backend: WARN
     org.hibernate.SQL: WARN

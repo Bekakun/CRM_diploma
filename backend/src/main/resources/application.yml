@@ -101,7 +101,7 @@ minio:
 # Логирование
 logging:
   level:
-    kz.attractorschool.backend: INFO
+    kz.iitu.backend: INFO
     org.hibernate.SQL: WARN
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
     org.flywaydb: INFO

@@ -74,7 +74,7 @@ class AuthServiceTest {
         request.setFirstName("Jane");
         request.setLastName("Smith");
 
-        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(userRepository.existsByEmailHash(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encoded");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(userRepository.findAllAdmins()).thenReturn(List.of());
@@ -94,7 +94,7 @@ class AuthServiceTest {
         request.setFirstName("John");
         request.setLastName("Doe");
 
-        when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
+        when(userRepository.existsByEmailHash(anyString())).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(ConflictException.class);
@@ -109,7 +109,7 @@ class AuthServiceTest {
         request.setEmail("user@example.com");
         request.setPassword("correctPassword");
 
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(activeUser));
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.of(activeUser));
         when(passwordEncoder.matches("correctPassword", activeUser.getPasswordHash())).thenReturn(true);
         when(jwtTokenProvider.generateAccessToken(activeUser)).thenReturn("access-token");
         when(jwtTokenProvider.generateRefreshToken(activeUser)).thenReturn("refresh-token");
@@ -127,7 +127,7 @@ class AuthServiceTest {
         request.setEmail("user@example.com");
         request.setPassword("wrongPassword");
 
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(activeUser));
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.of(activeUser));
         when(passwordEncoder.matches("wrongPassword", activeUser.getPasswordHash())).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(request))
@@ -140,7 +140,7 @@ class AuthServiceTest {
         request.setEmail("unknown@example.com");
         request.setPassword("any");
 
-        when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(BadCredentialsException.class);
@@ -154,7 +154,7 @@ class AuthServiceTest {
         request.setEmail("user@example.com");
         request.setPassword("correctPassword");
 
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(activeUser));
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.of(activeUser));
         when(passwordEncoder.matches("correctPassword", activeUser.getPasswordHash())).thenReturn(true);
 
         assertThatThrownBy(() -> authService.login(request))
@@ -214,7 +214,7 @@ class AuthServiceTest {
         request.setEmail("verify@example.com");
         request.setVerificationCode("123456");
 
-        when(userRepository.findByEmail("verify@example.com")).thenReturn(Optional.of(unverifiedUser));
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.of(unverifiedUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(jwtTokenProvider.generateAccessToken(any())).thenReturn("access");
         when(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh");
@@ -244,7 +244,7 @@ class AuthServiceTest {
         request.setEmail("verify@example.com");
         request.setVerificationCode("000000");
 
-        when(userRepository.findByEmail("verify@example.com")).thenReturn(Optional.of(unverifiedUser));
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.of(unverifiedUser));
 
         assertThatThrownBy(() -> authService.verifyEmail(request))
                 .isInstanceOf(RuntimeException.class)
@@ -270,7 +270,7 @@ class AuthServiceTest {
         request.setEmail("verify@example.com");
         request.setVerificationCode("123456");
 
-        when(userRepository.findByEmail("verify@example.com")).thenReturn(Optional.of(unverifiedUser));
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.of(unverifiedUser));
 
         assertThatThrownBy(() -> authService.verifyEmail(request))
                 .isInstanceOf(RuntimeException.class)
@@ -283,7 +283,7 @@ class AuthServiceTest {
         request.setEmail("user@example.com");
         request.setVerificationCode("123456");
 
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(activeUser));
+        when(userRepository.findByEmailHash(anyString())).thenReturn(Optional.of(activeUser));
 
         assertThatThrownBy(() -> authService.verifyEmail(request))
                 .isInstanceOf(RuntimeException.class)

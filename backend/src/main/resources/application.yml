@@ -37,24 +37,6 @@ spring:
     clean-disabled: true
     out-of-order: false
 
-  # Email / SMTP конфигурация
-  mail:
-    host: ${SMTP_HOST:smtp.gmail.com}
-    port: ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME}
-    password: ${SMTP_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          connectiontimeout: 10000
-          timeout: 10000
-          writetimeout: 10000
-        debug: false
-    default-encoding: UTF-8
   web:
     error:
       include-message: always
@@ -109,6 +91,11 @@ logging:
 openrouter:
   api:
     key: ${OPENROUTER_API_KEY}
+
+# Resend Email API
+resend:
+  api:
+    key: ${RESEND_API_KEY}
 
 # Telegram Bot
 telegram:

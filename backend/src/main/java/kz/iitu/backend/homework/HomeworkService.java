@@ -1,10 +1,5 @@
 package kz.iitu.backend.homework;
 
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
-import io.minio.http.Method;
 import kz.iitu.backend.homework.dto.CreateHomeworkRequest;
 import kz.iitu.backend.homework.dto.HomeworkResponse;
 import kz.iitu.backend.homework.dto.UpdateHomeworkRequest;
@@ -26,8 +21,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -41,14 +39,14 @@ public class HomeworkService {
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
-    private final MinioClient minioClient;
+    private final S3Client s3Client;
     private final HomeworkSubmissionRepository submissionRepository;
     private final NotificationService notificationService;
 
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-    @Value("${minio.max-file-size:52428800}") // 50MB
+    @Value("${minio.max-file-size:52428800}")
     private long maxFileSize;
 
     private static final Set<String> ALLOWED_FILE_TYPES = Set.of(
@@ -69,12 +67,10 @@ public class HomeworkService {
 
         validateInstructorAccess(lesson, instructorId);
 
-        // Проверка: только одно ДЗ на урок
         if (homeworkRepository.existsByLessonId(lessonId)) {
             throw new ConflictException("This lesson already has a homework assignment");
         }
 
-        // Валидация deadline
         if (request.getDeadline().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Deadline cannot be in the past");
         }
@@ -100,7 +96,6 @@ public class HomeworkService {
         homework = homeworkRepository.save(homework);
         log.info("Homework {} created successfully for lesson {}", homework.getId(), lessonId);
 
-        // Уведомляем всех студентов курса о новом ДЗ
         final Homework savedHomework = homework;
         studentRepository.findAllByCourseIdWithUser(lesson.getCourse().getId()).forEach(s ->
                 notificationService.notifyNewHomework(
@@ -134,13 +129,8 @@ public class HomeworkService {
 
         validateInstructorAccess(homework.getLesson(), instructorId);
 
-        if (request.getTitle() != null) {
-            homework.setTitle(request.getTitle());
-        }
-
-        if (request.getDescription() != null) {
-            homework.setDescription(request.getDescription());
-        }
+        if (request.getTitle() != null) homework.setTitle(request.getTitle());
+        if (request.getDescription() != null) homework.setDescription(request.getDescription());
 
         if (request.getDeadline() != null) {
             if (request.getDeadline().isBefore(LocalDateTime.now())) {
@@ -150,17 +140,14 @@ public class HomeworkService {
         }
 
         if (taskFile != null && !taskFile.isEmpty()) {
-            // Удалить старый файл если есть
             if (homework.getTaskFileUrl() != null) {
                 deleteTaskFile(homework.getTaskFileUrl());
             }
-            String newTaskFileUrl = uploadTaskFile(homework.getLesson(), taskFile);
-            homework.setTaskFileUrl(newTaskFileUrl);
+            homework.setTaskFileUrl(uploadTaskFile(homework.getLesson(), taskFile));
         }
 
         homework = homeworkRepository.save(homework);
         log.info("Homework {} updated successfully", homeworkId);
-
         return mapToResponseWithCounts(homework);
     }
 
@@ -173,7 +160,6 @@ public class HomeworkService {
 
         validateInstructorAccess(homework.getLesson(), instructorId);
 
-        // Удалить файл задания из MinIO если есть
         if (homework.getTaskFileUrl() != null) {
             deleteTaskFile(homework.getTaskFileUrl());
         }
@@ -192,7 +178,6 @@ public class HomeworkService {
             throw new ResourceNotFoundException("Homework task file not found");
         }
 
-        // Проверка доступа
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -206,35 +191,22 @@ public class HomeworkService {
             throw new ForbiddenException("You do not have access to this homework task file");
         }
 
-        try {
-            String url = minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET)
-                            .bucket(bucketName)
-                            .object(homework.getTaskFileUrl())
-                            .expiry(3600) // 1 час
-                            .build()
-            );
-
-            log.info("Generated download URL for homework task {}", homeworkId);
-            return url;
-
-        } catch (Exception e) {
-            log.error("Failed to generate download URL: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to generate download URL");
+        // Возвращаем URL через прокси бэкенда
+        String objectName = homework.getTaskFileUrl();
+        if (objectName.startsWith("/api/v1/files/")) {
+            return objectName;
         }
+        return "/api/v1/files/" + objectName;
     }
 
     private String uploadTaskFile(Lesson lesson, MultipartFile file) {
         validateFile(file);
 
         String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null) {
-            throw new BadRequestException("File name is missing");
-        }
+        if (originalFilename == null) throw new BadRequestException("File name is missing");
 
         String fileExtension = getFileExtension(originalFilename);
-        String minioObjectName = String.format("homework/%s/%s/%s_%s.%s",
+        String objectName = String.format("homework/%s/%s/%s_%s.%s",
                 lesson.getCourse().getId(),
                 lesson.getId(),
                 UUID.randomUUID(),
@@ -242,48 +214,46 @@ public class HomeworkService {
                 fileExtension
         );
 
-        try (InputStream inputStream = file.getInputStream()) {
-            minioClient.putObject(
-                    PutObjectArgs.builder()
+        try {
+            s3Client.putObject(
+                    PutObjectRequest.builder()
                             .bucket(bucketName)
-                            .object(minioObjectName)
-                            .stream(inputStream, file.getSize(), -1)
+                            .key(objectName)
                             .contentType(file.getContentType())
-                            .build()
+                            .contentLength(file.getSize())
+                            .build(),
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
             );
-
-            log.info("Task file uploaded to MinIO: {}", minioObjectName);
-            return minioObjectName;
-
+            log.info("Task file uploaded: {}", objectName);
+            return objectName;
         } catch (Exception e) {
-            log.error("Failed to upload task file to MinIO: {}", e.getMessage(), e);
+            log.error("Failed to upload task file: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to upload task file: " + e.getMessage());
         }
     }
 
-    private void deleteTaskFile(String minioObjectName) {
+    private void deleteTaskFile(String objectName) {
+        // Если URL — убираем префикс /api/v1/files/
+        if (objectName.startsWith("/api/v1/files/")) {
+            objectName = objectName.substring("/api/v1/files/".length());
+        }
         try {
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(minioObjectName)
-                            .build()
-            );
-            log.info("Task file deleted from MinIO: {}", minioObjectName);
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectName)
+                    .build());
+            log.info("Task file deleted: {}", objectName);
         } catch (Exception e) {
-            log.error("Failed to delete task file from MinIO: {}", e.getMessage(), e);
+            log.error("Failed to delete task file: {}", e.getMessage(), e);
         }
     }
 
     private void validateFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new BadRequestException("File is empty");
-        }
+        if (file.isEmpty()) throw new BadRequestException("File is empty");
 
         if (file.getSize() > maxFileSize) {
             throw new BadRequestException(
-                    String.format("File size exceeds maximum allowed size of %d MB", maxFileSize / 1024 / 1024)
-            );
+                    String.format("File size exceeds maximum allowed size of %d MB", maxFileSize / 1024 / 1024));
         }
 
         String contentType = file.getContentType();
@@ -292,12 +262,9 @@ public class HomeworkService {
         }
 
         String filename = file.getOriginalFilename();
-        if (filename == null) {
-            throw new BadRequestException("File name is missing");
-        }
+        if (filename == null) throw new BadRequestException("File name is missing");
 
-        String extension = getFileExtension(filename);
-        if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
+        if (!ALLOWED_EXTENSIONS.contains(getFileExtension(filename).toLowerCase())) {
             throw new BadRequestException("Invalid file extension. Only .pdf, .doc, .docx files are allowed");
         }
     }
@@ -315,9 +282,7 @@ public class HomeworkService {
 
     private String getFileExtension(String filename) {
         int lastDotIndex = filename.lastIndexOf('.');
-        if (lastDotIndex == -1) {
-            throw new BadRequestException("File has no extension");
-        }
+        if (lastDotIndex == -1) throw new BadRequestException("File has no extension");
         return filename.substring(lastDotIndex + 1).toLowerCase();
     }
 

@@ -1,5 +1,6 @@
 package kz.iitu.backend.shared.storage;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -7,15 +8,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.InputStream;
 
 /**
- * REST контроллер для работы с файлами
- * Базовый путь: /api/v1/files
+ * REST контроллер для проксирования файлов из хранилища.
+ * Базовый путь: /api/v1/files/**
+ * Поддерживает вложенные пути любой глубины:
+ *   /api/v1/files/profile-photos/user_123.jpg
+ *   /api/v1/files/homework/{courseId}/{lessonId}/uuid_name.pdf
+ *   /api/v1/files/materials/{courseId}/{lessonId}/uuid_name.pdf
  */
 @RestController
 @RequestMapping("/api/v1/files")
@@ -23,25 +27,30 @@ import java.io.InputStream;
 @Slf4j
 public class FileController {
 
+    private static final String BASE_PATH = "/api/v1/files/";
+
     private final FileStorageService fileStorageService;
 
-    /**
-     * Получить файл по пути
-     * GET /api/v1/files/{folder}/{filename}
-     */
-    @GetMapping("/{folder}/{filename:.+}")
-    public ResponseEntity<InputStreamResource> getFile(
-            @PathVariable String folder,
-            @PathVariable String filename
-    ) {
-        String filePath = folder + "/" + filename;
+    @GetMapping("/**")
+    public ResponseEntity<InputStreamResource> getFile(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+
+        // Извлекаем путь файла из URI
+        int baseIndex = requestUri.indexOf(BASE_PATH);
+        if (baseIndex == -1 || baseIndex + BASE_PATH.length() >= requestUri.length()) {
+            return ResponseEntity.badRequest().build();
+        }
+        String filePath = requestUri.substring(baseIndex + BASE_PATH.length());
+
         log.info("GET /api/v1/files/{}", filePath);
 
         try {
             InputStream fileStream = fileStorageService.getFileStream(filePath);
+            MediaType mediaType = determineMediaType(filePath);
 
-            // Определить MIME тип
-            MediaType mediaType = determineMediaType(filename);
+            String filename = filePath.contains("/")
+                    ? filePath.substring(filePath.lastIndexOf('/') + 1)
+                    : filePath;
 
             return ResponseEntity.ok()
                     .contentType(mediaType)
@@ -54,24 +63,16 @@ public class FileController {
         }
     }
 
-    /**
-     * Определить MIME тип файла по расширению
-     */
     private MediaType determineMediaType(String filename) {
-        String lowerFilename = filename.toLowerCase();
-
-        if (lowerFilename.endsWith(".jpg") || lowerFilename.endsWith(".jpeg")) {
-            return MediaType.IMAGE_JPEG;
-        } else if (lowerFilename.endsWith(".png")) {
-            return MediaType.IMAGE_PNG;
-        } else if (lowerFilename.endsWith(".gif")) {
-            return MediaType.IMAGE_GIF;
-        } else if (lowerFilename.endsWith(".webp")) {
-            return MediaType.parseMediaType("image/webp");
-        } else if (lowerFilename.endsWith(".pdf")) {
-            return MediaType.APPLICATION_PDF;
-        } else {
-            return MediaType.APPLICATION_OCTET_STREAM;
-        }
+        String lower = filename.toLowerCase();
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG;
+        if (lower.endsWith(".png")) return MediaType.IMAGE_PNG;
+        if (lower.endsWith(".gif")) return MediaType.IMAGE_GIF;
+        if (lower.endsWith(".webp")) return MediaType.parseMediaType("image/webp");
+        if (lower.endsWith(".pdf")) return MediaType.APPLICATION_PDF;
+        if (lower.endsWith(".docx")) return MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        if (lower.endsWith(".doc")) return MediaType.parseMediaType("application/msword");
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 }

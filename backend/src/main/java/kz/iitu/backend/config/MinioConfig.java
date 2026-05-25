@@ -1,15 +1,19 @@
 package kz.iitu.backend.config;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+
+import java.net.URI;
 
 /**
- * Конфигурация MinIO / S3-compatible хранилища файлов
+ * Конфигурация S3-совместимого хранилища файлов (Supabase Storage)
  */
 @Configuration
 @Slf4j
@@ -28,43 +32,23 @@ public class MinioConfig {
     private String bucketName;
 
     @Bean
-    public MinioClient minioClient() {
-        // Убираем path из URL — MinIO SDK принимает только host
-        String endpoint = minioUrl;
-        try {
-            java.net.URL parsed = new java.net.URL(minioUrl);
-            endpoint = parsed.getProtocol() + "://" + parsed.getHost()
-                    + (parsed.getPort() != -1 ? ":" + parsed.getPort() : "");
-        } catch (Exception e) {
-            log.warn("Could not parse minio.url, using as-is: {}", minioUrl);
-        }
-
-        log.info("Initializing S3 client with endpoint: {}", endpoint);
+    public S3Client s3Client() {
+        log.info("Initializing S3 client with endpoint: {}", minioUrl);
         log.info("Bucket name: {}", bucketName);
 
-        MinioClient minioClient = MinioClient.builder()
-                .endpoint(endpoint)
-                .credentials(accessKey, secretKey)
-                .region("ap-south-1")
+        // AWS SDK v2 поддерживает полный URL включая путь (/storage/v1/s3)
+        // pathStyleAccessEnabled=true нужен для кастомных S3-совместимых хранилищ
+        S3Client s3Client = S3Client.builder()
+                .endpointOverride(URI.create(minioUrl))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .region(Region.of("ap-south-1"))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(true)
+                        .build())
                 .build();
 
-        // Проверяем / создаём бакет — нефатально, не роняем приложение
-        try {
-            boolean bucketExists = minioClient.bucketExists(
-                    BucketExistsArgs.builder().bucket(bucketName).build()
-            );
-            if (!bucketExists) {
-                log.info("Bucket '{}' not found, creating...", bucketName);
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-                log.info("✅ Bucket '{}' created", bucketName);
-            } else {
-                log.info("✅ Bucket '{}' exists", bucketName);
-            }
-        } catch (Exception e) {
-            log.warn("⚠️ Could not verify/create bucket '{}': {}. File uploads may not work.", bucketName, e.getMessage());
-        }
-
-        log.info("✅ S3 client initialized");
-        return minioClient;
+        log.info("✅ S3 client initialized successfully");
+        return s3Client;
     }
 }

@@ -252,8 +252,8 @@ export default function Header({ onMenuClick }: Props) {
               onAnimationEnd={() => themeIconRef.current?.classList.remove('animate-spin-once')}
             >
               {theme === 'light'
-                ? <Sun size={17} />
-                : <Moon size={17} />
+                ? <Moon size={17} />
+                : <Sun size={17} />
               }
             </div>
           </button>

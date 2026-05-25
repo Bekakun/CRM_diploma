@@ -74,11 +74,11 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- MinIO для хранения файлов -->
+        <!-- AWS SDK v2 S3 для хранения файлов (Supabase Storage S3-compatible) -->
         <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <version>8.5.7</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.26.31</version>
         </dependency>
 
         <dependency>

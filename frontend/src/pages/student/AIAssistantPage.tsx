@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Send, Bot, User, BookOpen, Sparkles, Zap, Plus, Trash2, MessageSquare, X } from 'lucide-react'
+import { Send, Bot, User, BookOpen, Zap, Plus, Trash2, MessageSquare, X } from 'lucide-react'
 import MarkdownMessage from '../../components/common/MarkdownMessage'
 import { useTranslation } from 'react-i18next'
 import api from '../../services/api'

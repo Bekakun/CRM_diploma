@@ -42,7 +42,7 @@ vi.mock('react-router-dom', async () => {
 
 // Mock requestAnimationFrame / cancelAnimationFrame for jsdom
 let rafId = 0
-globalThis.requestAnimationFrame = (cb: FrameRequestCallback) => {
+globalThis.requestAnimationFrame = (_cb: FrameRequestCallback) => {
   return ++rafId
 }
 globalThis.cancelAnimationFrame = vi.fn()

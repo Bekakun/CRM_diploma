@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Конфигурация MinIO для хранения файлов
+ * Конфигурация MinIO / S3-compatible хранилища файлов
  */
 @Configuration
 @Slf4j
@@ -27,48 +27,44 @@ public class MinioConfig {
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-    /**
-     * Создание MinIO клиента
-     */
     @Bean
     public MinioClient minioClient() {
+        // Убираем path из URL — MinIO SDK принимает только host
+        String endpoint = minioUrl;
         try {
-            log.info("Initializing MinIO client...");
-            log.info("MinIO URL: {}", minioUrl);
-            log.info("Bucket name: {}", bucketName);
-
-            MinioClient minioClient = MinioClient.builder()
-                    .endpoint(minioUrl)
-                    .credentials(accessKey, secretKey)
-                    .region("ap-south-1")
-                    .build();
-
-            // Проверить существование bucket
-            boolean bucketExists = minioClient.bucketExists(
-                    BucketExistsArgs.builder()
-                            .bucket(bucketName)
-                            .build()
-            );
-
-            // Создать bucket если не существует
-            if (!bucketExists) {
-                log.info("Bucket '{}' does not exist. Creating...", bucketName);
-                minioClient.makeBucket(
-                        MakeBucketArgs.builder()
-                                .bucket(bucketName)
-                                .build()
-                );
-                log.info("✅ Bucket '{}' created successfully", bucketName);
-            } else {
-                log.info("✅ Bucket '{}' already exists", bucketName);
-            }
-
-            log.info("✅ MinIO client initialized successfully");
-            return minioClient;
-
+            java.net.URL parsed = new java.net.URL(minioUrl);
+            endpoint = parsed.getProtocol() + "://" + parsed.getHost()
+                    + (parsed.getPort() != -1 ? ":" + parsed.getPort() : "");
         } catch (Exception e) {
-            log.error("❌ Failed to initialize MinIO client: {}", e.getMessage(), e);
-            throw new RuntimeException("Не удалось инициализировать MinIO: " + e.getMessage(), e);
+            log.warn("Could not parse minio.url, using as-is: {}", minioUrl);
         }
+
+        log.info("Initializing S3 client with endpoint: {}", endpoint);
+        log.info("Bucket name: {}", bucketName);
+
+        MinioClient minioClient = MinioClient.builder()
+                .endpoint(endpoint)
+                .credentials(accessKey, secretKey)
+                .region("ap-south-1")
+                .build();
+
+        // Проверяем / создаём бакет — нефатально, не роняем приложение
+        try {
+            boolean bucketExists = minioClient.bucketExists(
+                    BucketExistsArgs.builder().bucket(bucketName).build()
+            );
+            if (!bucketExists) {
+                log.info("Bucket '{}' not found, creating...", bucketName);
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+                log.info("✅ Bucket '{}' created", bucketName);
+            } else {
+                log.info("✅ Bucket '{}' exists", bucketName);
+            }
+        } catch (Exception e) {
+            log.warn("⚠️ Could not verify/create bucket '{}': {}. File uploads may not work.", bucketName, e.getMessage());
+        }
+
+        log.info("✅ S3 client initialized");
+        return minioClient;
     }
 }

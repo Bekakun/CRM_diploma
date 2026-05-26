@@ -204,7 +204,7 @@
     "emailHint": "Email өзгертуге болмайды",
     "phonePlaceholder": "+7 (___) ___-__-__",
     "telegram": "Telegram хабарландырулары",
-    "telegramLinked": "Telegram сәтті байланыстырылды. Хабарландырулар ботқа келеді.",
+    "telegramLinked": "Telegram қосылды. Хабарламалар ботқа жіберіледі.",
     "telegramUnlinking": "Ажыратылуда...",
     "telegramUnlink": "Telegram-ды ажырату",
     "telegramUnlinked": "Telegram ажыратылды",

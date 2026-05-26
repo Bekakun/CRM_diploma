@@ -124,7 +124,7 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
       showToast(t('common.passwordMismatch'), 'error')
       return
     }
-    if (pw.next.length < 6) {
+    if (pw.next.length < 8) {
       showToast(t('common.passwordTooShort'), 'error')
       return
     }
@@ -385,7 +385,6 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
                 value={pw.current}
                 onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))}
                 placeholder={t('settings.currentPasswordPlaceholder')}
-                disableReveal
                 required
               />
             </FormField>

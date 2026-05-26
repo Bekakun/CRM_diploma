@@ -58,7 +58,8 @@ public class SecurityConfig {
                                 "/api/v1/webhooks/**",
                                 "/error",
                                 "/actuator/health",
-                                "/api/v1/invitations/by-token/**"
+                                "/api/v1/invitations/by-token/**",
+                                "/api/v1/files/**"
                         ).permitAll()
 
                         // Все остальные запросы требуют аутентификации

@@ -100,7 +100,7 @@
     "passwordChanged": "Пароль изменён",
     "passwordError": "Ошибка при смене пароля",
     "passwordMismatch": "Пароли не совпадают",
-    "passwordTooShort": "Пароль должен содержать не менее 6 символов"
+    "passwordTooShort": "Пароль должен содержать не менее 8 символов"
   },
   "roles": {
     "SUPER_ADMIN": "Супер-админ",

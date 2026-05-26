@@ -118,6 +118,22 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
     }
   }
 
+  const getPasswordStrength = (pwd: string): { score: number; label: string; color: string } => {
+    if (!pwd) return { score: 0, label: '', color: '' }
+    let score = 0
+    if (pwd.length >= 8)  score++
+    if (pwd.length >= 12) score++
+    if (/[A-Z]/.test(pwd)) score++
+    if (/[a-z]/.test(pwd)) score++
+    if (/\d/.test(pwd))    score++
+    if (/[!@#$%^&*(),.?":{}|<>_\-]/.test(pwd)) score++
+    if (score <= 2) return { score: 1, label: t('auth.strengthWeak'),   color: 'bg-red-500' }
+    if (score <= 4) return { score: 2, label: t('auth.strengthMedium'), color: 'bg-amber-500' }
+    if (score <= 5) return { score: 3, label: t('auth.strengthGood'),   color: 'bg-lime-500' }
+    return              { score: 4, label: t('auth.strengthStrong'),  color: 'bg-emerald-500' }
+  }
+  const pwStrength = getPasswordStrength(pw.next)
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     if (pw.next !== pw.confirm) {
@@ -390,14 +406,40 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
             </FormField>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label={t('settings.newPassword')} required hint={t('settings.newPasswordHint')}>
-                <PasswordInput
-                  value={pw.next}
-                  onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))}
-                  placeholder={t('settings.newPasswordPlaceholder')}
-                  required
-                />
-              </FormField>
+              <div>
+                <FormField label={t('settings.newPassword')} required>
+                  <PasswordInput
+                    value={pw.next}
+                    onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))}
+                    placeholder={t('settings.newPasswordPlaceholder')}
+                    required
+                  />
+                </FormField>
+                {pw.next ? (
+                  <div className="mt-2 space-y-1">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map(seg => (
+                        <div
+                          key={seg}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                            pwStrength.score >= seg ? pwStrength.color : 'bg-gray-200 dark:bg-gray-700'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className={`text-xs font-medium transition-colors duration-200 ${
+                      pwStrength.score === 1 ? 'text-red-500' :
+                      pwStrength.score === 2 ? 'text-amber-500' :
+                      pwStrength.score === 3 ? 'text-lime-600' :
+                      'text-emerald-600'
+                    }`}>
+                      {pwStrength.label}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t('settings.newPasswordHint')}</p>
+                )}
+              </div>
 
               <FormField label={t('auth.confirmPassword')} required>
                 <PasswordInput

@@ -100,7 +100,7 @@
     "passwordChanged": "Password changed",
     "passwordError": "Error changing password",
     "passwordMismatch": "Passwords do not match",
-    "passwordTooShort": "Password must be at least 6 characters"
+    "passwordTooShort": "Password must be at least 8 characters"
   },
   "roles": {
     "SUPER_ADMIN": "Super Admin",

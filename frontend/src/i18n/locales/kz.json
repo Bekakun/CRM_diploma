@@ -100,7 +100,7 @@
     "passwordChanged": "Құпиясөз өзгертілді",
     "passwordError": "Құпиясөзді өзгерту кезінде қате",
     "passwordMismatch": "Құпиясөздер сәйкес келмейді",
-    "passwordTooShort": "Құпиясөз кемінде 6 таңбадан тұруы керек"
+    "passwordTooShort": "Құпиясөз кемінде 8 таңбадан тұруы керек"
   },
   "roles": {
     "SUPER_ADMIN": "Супер-әкімші",

@@ -45,4 +45,8 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
 
     @Query("SELECT s FROM Student s JOIN FETCH s.user WHERE s.course.id = :courseId")
     List<Student> findAllByCourseIdWithUser(@Param("courseId") UUID courseId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("DELETE FROM Student s WHERE s.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") UUID userId);
 }

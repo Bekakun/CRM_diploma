@@ -2,6 +2,7 @@ package kz.iitu.backend.user;
 
 import kz.iitu.backend.shared.encryption.EmailHashUtil;
 import kz.iitu.backend.shared.storage.FileStorageService;
+import kz.iitu.backend.student.StudentRepository;
 import kz.iitu.backend.user.dto.ChangePasswordRequest;
 import kz.iitu.backend.user.dto.UpdateUserRequest;
 import kz.iitu.backend.user.dto.UserResponse;
@@ -25,6 +26,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
     private final EmailHashUtil emailHashUtil;
+    private final StudentRepository studentRepository;
 
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Pageable pageable) {
@@ -56,8 +58,16 @@ public class UserService {
 
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
         if (request.getLastName() != null) user.setLastName(request.getLastName());
-        if (request.getRole() != null) user.setRole(request.getRole());
         if (request.getPhone() != null) user.setPhone(request.getPhone());
+
+        // Если роль меняется с STUDENT на другую — удалить все зачисления
+        if (request.getRole() != null && request.getRole() != user.getRole()) {
+            if (user.getRole() == UserRole.STUDENT && request.getRole() != UserRole.STUDENT) {
+                log.info("Role changed from STUDENT to {} for user {}, removing all enrollments", request.getRole(), userId);
+                studentRepository.deleteAllByUserId(userId);
+            }
+            user.setRole(request.getRole());
+        }
         if (request.getProfilePhotoUrl() != null) user.setProfilePhotoUrl(request.getProfilePhotoUrl());
         if (request.getStatus() != null) user.setStatus(request.getStatus());
 

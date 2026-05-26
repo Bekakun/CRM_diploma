@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, BookOpen, Ban, Edit, RefreshCw, MoreVertical, Users } from 'lucide-react'
+import { Search, BookOpen, Ban, Edit, RefreshCw, MoreVertical, Users, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import EnrollStudentModal from '../../components/admin/EnrollStudentModal'
 import UserProfileModal from '../../components/admin/UserProfileModal'
@@ -66,6 +66,8 @@ export default function ManageUsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [editForm, setEditForm] = useState({ firstName: '', lastName: '', email: '', phone: '', role: '' as UserRole })
   const [editLoading, setEditLoading] = useState(false)
+  const [deletingUser, setDeletingUser] = useState<User | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const pageSize = 20
 
@@ -123,6 +125,22 @@ export default function ManageUsersPage() {
       showToast(err?.response?.data?.message || t('admin.users.saveError'), 'error')
     } finally {
       setEditLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async () => {
+    if (!deletingUser) return
+    setDeleteLoading(true)
+    try {
+      await api.delete(`/admin/users/${deletingUser.id}`)
+      setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id))
+      setTotalElements((prev) => prev - 1)
+      setDeletingUser(null)
+      showToast(t('admin.users.deleted'), 'success')
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || t('admin.users.deleteError'), 'error')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -299,6 +317,18 @@ export default function ManageUsersPage() {
                                   {user.status === 'ACTIVE' ? t('admin.users.deactivate') : t('admin.users.activate')}
                                 </button>
                               )}
+                              {isSuperAdmin && user.id !== currentUser?.id && (
+                                <>
+                                  <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+                                  <button
+                                    onClick={() => { setDeletingUser(user); setOpenMenuId(null) }}
+                                    className="w-full text-left px-3.5 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    {t('admin.users.deleteUser')}
+                                  </button>
+                                </>
+                              )}
                               {!isSuperAdmin && (
                                 <p className="px-3.5 py-2 text-xs text-gray-400 dark:text-gray-500">
                                   {t('admin.users.viewOnly')}
@@ -363,11 +393,38 @@ export default function ManageUsersPage() {
           onEdit={(u) => { setProfileUser(null); openEdit(u) }}
           onToggleStatus={(u) => { setProfileUser(null); handleToggleStatus(u) }}
           onEnroll={(u) => { setProfileUser(null); setSelectedStudent(u) }}
+          onDelete={(u) => { setProfileUser(null); setDeletingUser(u) }}
         />
       )}
 
       {selectedStudent && (
         <EnrollStudentModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
+      )}
+
+      {deletingUser && (
+        <Modal title={t('admin.users.deleteConfirmTitle')} onClose={() => setDeletingUser(null)}>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-100 dark:border-red-800">
+              <Trash2 className="w-5 h-5 text-red-500 shrink-0" />
+              <p className="text-sm text-red-700 dark:text-red-300">
+                {t('admin.users.deleteConfirmText', { name: `${deletingUser.firstName} ${deletingUser.lastName}` })}
+              </p>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t('admin.users.deleteConfirmWarning')}
+            </p>
+            <div className="flex gap-3 pt-1">
+              <button onClick={() => setDeletingUser(null)} className="btn-secondary flex-1">{t('common.cancel')}</button>
+              <button
+                onClick={handleDeleteUser}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
+              >
+                {deleteLoading ? t('admin.users.deleting') : t('admin.users.confirmDelete')}
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
 
       {editingUser && (

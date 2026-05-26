@@ -1,4 +1,4 @@
-import { X, Edit, Ban, BookOpen, Mail, Phone, Calendar, ShieldCheck } from 'lucide-react'
+import { X, Edit, Ban, BookOpen, Mail, Phone, Calendar, ShieldCheck, Trash2 } from 'lucide-react'
 import { UserRole } from '../../types'
 import { useAuthStore } from '../../context/authStore'
 import { getFileUrl } from '../../utils/fileUrl'
@@ -21,6 +21,7 @@ interface Props {
   onEdit: (user: User) => void
   onToggleStatus: (user: User) => void
   onEnroll?: (user: User) => void
+  onDelete?: (user: User) => void
 }
 
 const ROLE_COLORS: Record<UserRole, string> = {
@@ -44,7 +45,7 @@ const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Активен', INACTIVE: 'Неактивен', PENDING: 'Ожидает',
 }
 
-export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus, onEnroll }: Props) {
+export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus, onEnroll, onDelete }: Props) {
   const { user: currentUser } = useAuthStore()
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
@@ -136,12 +137,22 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                   onClick={() => { onToggleStatus(user); onClose() }}
                   className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl font-medium transition-colors border ${
                     user.status === 'ACTIVE'
-                      ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40'
+                      ? 'border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40'
                       : 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
                   }`}
                 >
                   <Ban className="w-4 h-4" />
                   {user.status === 'ACTIVE' ? 'Деактивировать' : 'Активировать'}
+                </button>
+              )}
+
+              {isSuperAdmin && onDelete && (
+                <button
+                  onClick={() => { onDelete(user); onClose() }}
+                  className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl font-medium transition-colors border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Удалить
                 </button>
               )}
             </div>

@@ -272,7 +272,15 @@
       "createdAt": "Registration date",
       "saving": "Saving...",
       "roleSuperAdmin": "Super Administrator",
-      "viewOnly": "View only"
+      "viewOnly": "View only",
+      "deleteUser": "Delete user",
+      "deleteConfirmTitle": "Delete user?",
+      "deleteConfirmText": "Are you sure you want to delete {{name}}?",
+      "deleteConfirmWarning": "This action is irreversible. All user data will be permanently removed.",
+      "confirmDelete": "Delete",
+      "deleting": "Deleting...",
+      "deleted": "User deleted",
+      "deleteError": "Error deleting user"
     },
     "payments": {
       "title": "Payment Management",

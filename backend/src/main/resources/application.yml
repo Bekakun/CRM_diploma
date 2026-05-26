@@ -62,7 +62,7 @@ app:
   name: "CRM LMS"
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
   email:
-    from: ${APP_EMAIL_FROM:onboarding@resend.dev}
+    from: ${APP_EMAIL_FROM:noreply@crm-lms.com}
     from-name: "CRM LMS System"
 
 # MinIO конфигурация
@@ -92,10 +92,10 @@ openrouter:
   api:
     key: ${OPENROUTER_API_KEY}
 
-# Resend Email API
-resend:
+# Brevo (Sendinblue) Email API
+brevo:
   api:
-    key: ${RESEND_API_KEY}
+    key: ${BREVO_API_KEY}
 
 # Telegram Bot
 telegram:

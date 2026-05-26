@@ -1,30 +1,36 @@
 package kz.iitu.backend.shared.email;
 
-import com.resend.Resend;
-import com.resend.core.exception.ResendException;
-import com.resend.services.emails.model.CreateEmailOptions;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Сервис для отправки email уведомлений через Resend API
+ * Сервис для отправки email уведомлений через Brevo (Sendinblue) HTTP API
  */
 @Service
 @Slf4j
-@org.springframework.context.annotation.Lazy
-public class EmailService {
+@Lazy
+public class
+EmailService {
+
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
     private final TemplateEngine templateEngine;
+    private final RestClient restClient;
 
-    @Value("${resend.api.key}")
-    private String resendApiKey;
+    @Value("${brevo.api.key}")
+    private String brevoApiKey;
 
     @Value("${app.email.from}")
     private String fromEmail;
@@ -35,8 +41,9 @@ public class EmailService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    public EmailService(@org.springframework.beans.factory.annotation.Qualifier("emailTemplateEngine") TemplateEngine templateEngine) {
+    public EmailService(@Qualifier("emailTemplateEngine") TemplateEngine templateEngine) {
         this.templateEngine = templateEngine;
+        this.restClient = RestClient.create();
     }
 
     @Async
@@ -54,24 +61,24 @@ public class EmailService {
             String htmlContent = templateEngine.process(templateName, context);
             log.info("Template processed successfully. HTML length: {} chars", htmlContent.length());
 
-            Resend resend = new Resend(resendApiKey);
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("sender", Map.of("name", fromName, "email", fromEmail));
+            requestBody.put("to", List.of(Map.of("email", to)));
+            requestBody.put("subject", subject);
+            requestBody.put("htmlContent", htmlContent);
 
-            String from = fromName + " <" + fromEmail + ">";
+            restClient.post()
+                    .uri(BREVO_API_URL)
+                    .header("api-key", brevoApiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .retrieve()
+                    .toBodilessEntity();
 
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                    .from(from)
-                    .to(to)
-                    .subject(subject)
-                    .html(htmlContent)
-                    .build();
+            log.info("✅ Email sent successfully via Brevo to: {}", to);
 
-            resend.emails().send(params);
-            log.info("✅ Email sent successfully to: {}", to);
-
-        } catch (ResendException e) {
-            log.error("❌ Resend API error sending email to {}: {}", to, e.getMessage());
         } catch (Exception e) {
-            log.error("❌ Unexpected error sending email to {}: {}", to, e.getMessage());
+            log.error("❌ Error sending email to {} via Brevo: {}", to, e.getMessage());
         }
     }
 

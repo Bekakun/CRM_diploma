@@ -57,6 +57,7 @@ public class AdminDashboardService {
                         .firstName(u.getFirstName())
                         .lastName(u.getLastName())
                         .email(u.getEmail())
+                        .phone(u.getPhone())
                         .role(u.getRole().name())
                         .profilePhotoUrl(u.getProfilePhotoUrl())
                         .status(u.getStatus() != null ? u.getStatus().name() : "ACTIVE")

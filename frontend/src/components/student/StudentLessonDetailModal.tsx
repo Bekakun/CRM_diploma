@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Download, Video, FileText, ExternalLink, Upload, CheckCircle, Clock, MapPin, Link2, BookOpen, MessageSquare, Calendar } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../../services/api'
+import { getFileUrl } from '../../utils/fileUrl'
 
 interface Material {
   id: string
@@ -62,7 +63,7 @@ export default function StudentLessonDetailModal({ lesson, onClose }: StudentLes
     setDownloadingId(material.id)
     try {
       const res = await api.get<{ downloadUrl: string }>(`/instructor/files/materials/${material.id}`)
-      window.open(res.data.downloadUrl, '_blank')
+      window.open(getFileUrl(res.data.downloadUrl), '_blank')
     } catch {
       alert(t('student.lesson.fileError'))
     } finally {
@@ -301,7 +302,7 @@ export default function StudentLessonDetailModal({ lesson, onClose }: StudentLes
                       onClick={async () => {
                         try {
                           const res = await api.get<{ downloadUrl: string }>(`/instructor/files/homework/${lesson.homework!.homeworkFileId}/task`)
-                          window.open(res.data.downloadUrl, '_blank')
+                          window.open(getFileUrl(res.data.downloadUrl), '_blank')
                         } catch {
                           alert(t('student.lesson.taskFileError'))
                         }

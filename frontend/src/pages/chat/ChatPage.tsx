@@ -451,20 +451,21 @@ export default function ChatPage() {
                         {msg.fileUrl ? (
                           msg.fileType?.startsWith('image/') ? (
                             <button
-                              onClick={() => setLightboxImage({ src: msg.fileUrl!, alt: msg.fileName ?? 'image' })}
+                              onClick={() => setLightboxImage({ src: getFileUrl(msg.fileUrl), alt: msg.fileName ?? 'image' })}
                               className="block focus:outline-none"
                             >
                               <img
-                                src={msg.fileUrl}
+                                src={getFileUrl(msg.fileUrl)}
                                 alt={msg.fileName ?? 'image'}
                                 className="max-w-[240px] max-h-[200px] object-cover rounded-2xl hover:opacity-90 transition-opacity cursor-zoom-in"
                               />
                             </button>
                           ) : (
                             <a
-                              href={msg.fileUrl}
+                              href={getFileUrl(msg.fileUrl)}
                               target="_blank"
                               rel="noreferrer"
+                              download={msg.fileName}
                               className={`flex items-center gap-2.5 px-4 py-3 hover:opacity-80 transition-opacity ${isMe ? 'text-white' : ''}`}
                             >
                               <FileText className="w-5 h-5 shrink-0" />

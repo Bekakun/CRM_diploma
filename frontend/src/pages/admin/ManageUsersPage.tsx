@@ -5,6 +5,7 @@ import EnrollStudentModal from '../../components/admin/EnrollStudentModal'
 import UserProfileModal from '../../components/admin/UserProfileModal'
 import { useAuthStore } from '../../context/authStore'
 import api from '../../services/api'
+import { getFileUrl } from '../../utils/fileUrl'
 import { UserRole } from '../../types'
 import { TableRowSkeleton } from '../../components/common/Skeleton'
 import Modal from '../../components/common/Modal'
@@ -227,7 +228,7 @@ export default function ManageUsersPage() {
                             className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center overflow-hidden shrink-0 hover:ring-2 hover:ring-primary-400 hover:ring-offset-2 transition-all cursor-pointer"
                           >
                             {user.profilePhotoUrl ? (
-                              <img src={user.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                              <img src={getFileUrl(user.profilePhotoUrl)} alt="" className="w-full h-full object-cover" />
                             ) : (
                               <span className="text-white font-semibold text-xs">
                                 {user.firstName?.[0]}{user.lastName?.[0]}

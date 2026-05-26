@@ -1,6 +1,7 @@
 import { X, Edit, Ban, BookOpen, Mail, Phone, Calendar, ShieldCheck } from 'lucide-react'
 import { UserRole } from '../../types'
 import { useAuthStore } from '../../context/authStore'
+import { getFileUrl } from '../../utils/fileUrl'
 
 interface User {
   id: string
@@ -66,7 +67,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
           <div className="sm:w-56 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 flex flex-col items-center justify-center p-8 gap-4">
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center overflow-hidden ring-4 ring-white dark:ring-gray-800 shadow-lg">
               {user.profilePhotoUrl ? (
-                <img src={user.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                <img src={getFileUrl(user.profilePhotoUrl)} alt="" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-white font-bold text-3xl">
                   {user.firstName?.[0]}{user.lastName?.[0]}

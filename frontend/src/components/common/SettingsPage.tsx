@@ -8,6 +8,7 @@ import Toaster from './Toaster'
 import FormField from './FormField'
 import PasswordInput from './PasswordInput'
 import api from '../../services/api'
+import { getFileUrl } from '../../utils/fileUrl'
 
 interface Props {
   showPasswordChange?: boolean
@@ -159,7 +160,7 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
             <div className="relative group mb-3">
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center overflow-hidden shadow-md">
                 {user?.profilePhotoUrl ? (
-                  <img src={user.profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
+                  <img src={getFileUrl(user.profilePhotoUrl)} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-3xl font-bold text-white">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}

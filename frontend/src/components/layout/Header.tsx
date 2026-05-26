@@ -9,6 +9,7 @@ import { Bell, LogOut, Menu, Moon, Sun, MessageSquare, X } from 'lucide-react'
 import 'flag-icons/css/flag-icons.min.css'
 import NotificationPanel, { type Notification } from '../common/NotificationPanel'
 import api from '../../services/api'
+import { getFileUrl } from '../../utils/fileUrl'
 
 interface ChatToastData {
   id: string
@@ -37,7 +38,7 @@ function ChatToast({ data, onClose, onClick }: { data: ChatToastData; onClose: (
       <div className="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300
                       font-bold flex items-center justify-center shrink-0 text-sm overflow-hidden">
         {data.senderAvatar
-          ? <img src={data.senderAvatar} alt={data.senderName} className="w-full h-full object-cover" />
+          ? <img src={getFileUrl(data.senderAvatar)} alt={data.senderName} className="w-full h-full object-cover" />
           : data.senderName.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
         }
       </div>
@@ -305,7 +306,7 @@ export default function Header({ onMenuClick }: Props) {
                           transition-all duration-200"
             >
               {user?.profilePhotoUrl ? (
-                <img src={user.profilePhotoUrl} alt="avatar" className="w-full h-full object-cover" />
+                <img src={getFileUrl(user.profilePhotoUrl)} alt="avatar" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-white font-semibold text-xs">
                   {user?.firstName?.[0]}{user?.lastName?.[0]}

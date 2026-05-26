@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Users } from 'lucide-react'
 import api from '../../services/api'
+import { getFileUrl } from '../../utils/fileUrl'
 import { StudentCardSkeleton } from '../../components/common/Skeleton'
 
 interface StudentResponse {
@@ -153,7 +154,7 @@ export default function StudentsPage() {
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-11 h-11 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                     {student.profilePhotoUrl ? (
-                      <img src={student.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                      <img src={getFileUrl(student.profilePhotoUrl)} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-white font-semibold text-sm">
                         {student.firstName[0]}{student.lastName[0]}

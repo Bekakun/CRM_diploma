@@ -195,9 +195,22 @@ export default function AIAssistantPage() {
   return (
     <div className="h-[calc(100vh-7rem)] flex gap-4">
 
+      {/* ── Sidebar overlay backdrop (mobile only) ── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar: history ── */}
-      <aside className={`flex flex-col shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'}`}>
-        <div className="card flex flex-col h-full p-3 gap-2 min-w-[256px]">
+      <aside className={`
+        flex flex-col shrink-0 transition-all duration-300
+        md:relative md:z-auto
+        fixed inset-y-0 left-0 z-40 md:inset-auto
+        ${sidebarOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full md:w-0 md:overflow-hidden md:translate-x-0'}
+      `}>
+        <div className="card flex flex-col h-full p-3 gap-2 w-64 md:min-w-[256px] overflow-y-auto mt-0 md:mt-0 pt-safe">
           {/* New chat button */}
           <button
             onClick={newChat}

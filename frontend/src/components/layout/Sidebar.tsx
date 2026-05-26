@@ -10,6 +10,7 @@ import clsx from 'clsx'
 import { UserRole } from '../../types'
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
+import { getFileUrl } from '../../utils/fileUrl'
 
 interface Props {
   open: boolean
@@ -202,7 +203,7 @@ export default function Sidebar({ open, onClose }: Props) {
                           flex items-center justify-center overflow-hidden shrink-0
                           shadow-md ring-2 ring-white/50 dark:ring-gray-900/50`}>
             {user?.profilePhotoUrl ? (
-              <img src={user.profilePhotoUrl} alt="avatar" className="w-full h-full object-cover" />
+              <img src={getFileUrl(user.profilePhotoUrl)} alt="avatar" className="w-full h-full object-cover" />
             ) : (
               <span className="text-white font-semibold text-sm drop-shadow">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}

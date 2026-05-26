@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Users, UserPlus, GraduationCap, TrendingUp, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../../services/api'
+import { getFileUrl } from '../../utils/fileUrl'
 import AnimatedStatCard from '../../components/common/AnimatedStatCard'
 import AnimatedProgressBar from '../../components/common/AnimatedProgressBar'
 import { StatCardSkeleton, ListItemSkeleton } from '../../components/common/Skeleton'
@@ -203,7 +204,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden shadow-sm shrink-0">
                       {user.profilePhotoUrl ? (
-                        <img src={user.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                        <img src={getFileUrl(user.profilePhotoUrl)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-white font-semibold text-sm">
                           {user.firstName[0]}{user.lastName[0]}

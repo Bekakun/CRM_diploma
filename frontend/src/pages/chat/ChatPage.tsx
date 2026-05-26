@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import { Send, MessageSquare, Search, Plus, X, Paperclip, FileText, Download, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../../services/api'
-import { connectChat, disconnectChat } from '../../services/chatSocket'
+import { getFileUrl } from '../../utils/fileUrl'
+import { connectChat, disconnectChat, isSocketConnected } from '../../services/chatSocket'
 import { useAuthStore } from '../../context/authStore'
 import { tokenStorage } from '../../services/authService'
 
@@ -115,7 +116,7 @@ function NewChatModal({ onSelect, onClose }: { onSelect: (userId: string) => voi
 
 function Avatar({ name, url, size = 'md' }: { name: string; url?: string | null; size?: 'sm' | 'md' }) {
   const cls = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
-  if (url) return <img src={url} className={`${cls} rounded-full object-cover shrink-0`} alt={name} />
+  if (url) return <img src={getFileUrl(url)} className={`${cls} rounded-full object-cover shrink-0`} alt={name} />
   const initials = name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase()
   return (
     <div className={`${cls} rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 font-bold flex items-center justify-center shrink-0`}>
@@ -240,6 +241,20 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Fallback: reload messages when tab regains focus (in case WebSocket missed something)
+  useEffect(() => {
+    if (!activeConv) return
+    const onFocus = () => {
+      if (!isSocketConnected()) {
+        api.get<Message[]>(`/chat/conversations/${activeConv.id}/messages`)
+          .then((res) => setMessages(res.data))
+          .catch(() => {})
+      }
+    }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [activeConv?.id])
 
   const handleDeleteConversation = async (convId: string, e: React.MouseEvent) => {
     e.stopPropagation()

@@ -37,7 +37,7 @@ export default function AIAssistantPage() {
   const [messages, setMessages]                     = useState<Message[]>([])
   const [inputText, setInputText]                   = useState('')
   const [isLoading, setIsLoading]                   = useState(false)
-  const [sidebarOpen, setSidebarOpen]               = useState(true)
+  const [sidebarOpen, setSidebarOpen]               = useState(() => window.innerWidth >= 768)
   const [hoveredMsgId, setHoveredMsgId]             = useState<string | null>(null)
   const [deletingSessionId, setDeletingSessionId]   = useState<string | null>(null)
 
@@ -359,7 +359,7 @@ export default function AIAssistantPage() {
                     <p className={`text-[11px] mt-1.5 ${
                       message.sender === 'ai' ? 'text-gray-400 dark:text-gray-500' : 'text-primary-100/80'
                     }`}>
-                      {message.timestamp.toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' })}
+                      {message.timestamp.toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' })}
                     </p>
                   </div>
 

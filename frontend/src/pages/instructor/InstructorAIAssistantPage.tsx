@@ -33,7 +33,7 @@ export default function InstructorAIAssistantPage() {
   const [messages, setMessages]             = useState<Message[]>([])
   const [inputText, setInputText]           = useState('')
   const [isLoading, setIsLoading]           = useState(false)
-  const [sidebarOpen, setSidebarOpen]       = useState(true)
+  const [sidebarOpen, setSidebarOpen]       = useState(() => window.innerWidth >= 768)
   const [hoveredMsgId, setHoveredMsgId]     = useState<string | null>(null)
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null)
 
@@ -314,7 +314,7 @@ export default function InstructorAIAssistantPage() {
                     <p className={`text-[11px] mt-1.5 ${
                       message.sender === 'ai' ? 'text-gray-400 dark:text-gray-500' : 'text-violet-200'
                     }`}>
-                      {message.timestamp.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                      {message.timestamp.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' })}
                     </p>
                   </div>
 

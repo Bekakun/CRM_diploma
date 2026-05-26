@@ -490,7 +490,7 @@ export default function ChatPage() {
                       </div>
                       </div>
                       <span className="text-[10px] text-gray-400 dark:text-gray-500 px-1">
-                        {new Date(msg.createdAt).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(msg.createdAt).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' })}
                       </span>
                     </div>
                   </div>
@@ -502,7 +502,7 @@ export default function ChatPage() {
 
           {/* Input */}
           <div className="px-5 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-            <div className="flex items-end gap-2">
+            <div className="flex items-center gap-2">
               {/* Hidden file input */}
               <input
                 ref={fileInputRef}

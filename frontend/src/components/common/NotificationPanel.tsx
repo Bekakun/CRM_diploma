@@ -108,14 +108,16 @@ export default function NotificationPanel({ onClose, onUnreadCountChange, cached
   return (
     <div
       ref={panelRef}
-      className="absolute right-0 top-full mt-2 w-[380px]
-                 bg-white/90 dark:bg-gray-900/90
-                 backdrop-blur-xl
-                 rounded-2xl
-                 shadow-[0_20px_60px_rgba(0,0,0,0.15),0_4px_16px_rgba(0,0,0,0.08)]
-                 border border-white/60 dark:border-gray-700/50
-                 z-50 overflow-hidden
-                 animate-[fadeSlideDown_0.2s_ease_both]"
+      className="
+        fixed inset-x-3 top-[4.25rem]
+        sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[380px]
+        bg-white/90 dark:bg-gray-900/90
+        backdrop-blur-xl
+        rounded-2xl
+        shadow-[0_20px_60px_rgba(0,0,0,0.15),0_4px_16px_rgba(0,0,0,0.08)]
+        border border-white/60 dark:border-gray-700/50
+        z-50 overflow-hidden
+        animate-[fadeSlideDown_0.2s_ease_both]"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3.5

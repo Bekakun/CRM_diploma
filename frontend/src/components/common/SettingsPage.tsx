@@ -385,6 +385,7 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
                 value={pw.current}
                 onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))}
                 placeholder={t('settings.currentPasswordPlaceholder')}
+                disableReveal
                 required
               />
             </FormField>

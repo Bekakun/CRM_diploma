@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../../context/authStore'
 import { useTranslation } from 'react-i18next'
 import { Sparkles, Mail, Lock, ArrowRight, BookOpen, Users, TrendingUp, Bot } from 'lucide-react'
+import api from '../../services/api'
+import authService from '../../services/authService'
 
 const FEATURES = [
   { icon: Users,      color: 'from-emerald-400 to-teal-500',  labelKey: 'Студенты' },
@@ -23,6 +25,11 @@ export default function LoginPage() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
+  const [step, setStep]         = useState<'login' | 'verify'>('login')
+  const [code, setCode]         = useState('')
+  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
 
   const navigate = useNavigate()
   const { login, isLoading, isAuthenticated } = useAuthStore()
@@ -120,11 +127,113 @@ export default function LoginPage() {
       await login(email, password)
       navigate('/', { replace: true })
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || t('auth.loginError'))
+      const msg = err.response?.data?.message || err.message || ''
+      if (msg === 'EMAIL_NOT_VERIFIED') {
+        // Auto-send a fresh code and switch to verify step
+        try { await api.post('/auth/resend-verification', { email }) } catch {}
+        setStep('verify')
+        setResendCooldown(60)
+      } else {
+        setError(msg || t('auth.loginError'))
+      }
     }
   }
 
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setVerifyLoading(true)
+    try {
+      const response = await authService.verifyEmail(email, code)
+      useAuthStore.getState().setUser(response.user)
+      navigate('/', { replace: true })
+    } catch (err: any) {
+      setError(err.response?.data?.message || t('auth.verificationError'))
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    setResendLoading(true)
+    try {
+      await api.post('/auth/resend-verification', { email })
+      setResendCooldown(60)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Не удалось отправить код')
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const t = setTimeout(() => setResendCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [resendCooldown])
+
   const heroTags = t('auth.heroTags', { returnObjects: true }) as string[]
+
+  // ── Verify step ──
+  if (step === 'verify') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center">
+              <Mail className="w-7 h-7 text-primary-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Подтверждение email</h1>
+            <p className="text-sm text-gray-500">
+              Код отправлен на <span className="font-semibold text-gray-700">{email}</span>
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>
+          )}
+
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Код подтверждения</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={code}
+                onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
+                className="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 px-4 border border-gray-200 rounded-xl outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all"
+                placeholder="000000"
+                autoFocus
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={verifyLoading || code.length < 6}
+              className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all"
+            >
+              {verifyLoading ? 'Проверка...' : 'Подтвердить и войти →'}
+            </button>
+          </form>
+
+          <div className="text-center space-y-2">
+            <button
+              onClick={handleResend}
+              disabled={resendLoading || resendCooldown > 0}
+              className="text-sm text-primary-600 hover:text-primary-700 disabled:text-gray-400 transition-colors"
+            >
+              {resendCooldown > 0 ? `Отправить повторно (${resendCooldown}с)` : resendLoading ? 'Отправка...' : 'Отправить код повторно'}
+            </button>
+            <br />
+            <button onClick={() => { setStep('login'); setError(''); setCode('') }} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+              ← Назад
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50 overflow-hidden">

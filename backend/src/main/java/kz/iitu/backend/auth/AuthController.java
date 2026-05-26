@@ -126,6 +126,17 @@ public class AuthController {
     }
 
     /**
+     * Повторная отправка кода верификации email
+     */
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Map<String, String>> resendVerification(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        log.info("POST /api/v1/auth/resend-verification - повторная отправка кода: {}", email);
+        authService.resendVerificationEmail(email);
+        return ResponseEntity.ok(Map.of("message", "Код отправлен повторно"));
+    }
+
+    /**
      * Запрос сброса пароля — отправляет письмо с токеном
      */
     @PostMapping("/forgot-password")

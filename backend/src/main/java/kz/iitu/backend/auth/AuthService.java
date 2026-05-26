@@ -121,10 +121,35 @@ public class AuthService {
             throw new BadCredentialsException("Аккаунт деактивирован");
         }
 
+        if (!user.getIsEmailVerified()) {
+            throw new BadCredentialsException("EMAIL_NOT_VERIFIED");
+        }
+
         String accessToken = jwtTokenProvider.generateAccessToken(user);
         String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
         return buildAuthResponse(user, accessToken, refreshToken);
+    }
+
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        log.info("Повторная отправка кода верификации для: {}", email);
+
+        String emailHash = emailHashUtil.hash(email);
+        User user = userRepository.findByEmailHash(emailHash)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        if (user.getIsEmailVerified()) {
+            return; // Уже подтверждён — ничего не делать
+        }
+
+        String newCode = String.format("%06d", new SecureRandom().nextInt(1_000_000));
+        user.setEmailVerificationToken(newCode);
+        user.setEmailVerificationTokenExpiresAt(LocalDateTime.now().plusHours(24));
+        userRepository.save(user);
+
+        emailService.sendVerificationEmail(user.getEmail(), user.getFirstName(), newCode);
+        log.info("Код верификации повторно отправлен: {}", email);
     }
 
     @Transactional(readOnly = true)

@@ -4,7 +4,7 @@ import { useAuthStore } from '../../context/authStore'
 import { useTranslation } from 'react-i18next'
 import { Sparkles, Mail, Lock, ArrowRight, BookOpen, Users, TrendingUp, Bot } from 'lucide-react'
 import api from '../../services/api'
-import authService from '../../services/authService'
+import { authService } from '../../services/authService'
 
 const FEATURES = [
   { icon: Users,      color: 'from-emerald-400 to-teal-500',  labelKey: 'Студенты' },

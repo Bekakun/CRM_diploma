@@ -662,7 +662,8 @@
     "deleteConversation": "Удалить диалог",
     "deleteMessage": "Удалить сообщение",
     "confirmDeleteConversation": "Удалить этот диалог? Все сообщения будут удалены.",
-    "confirmDeleteMessage": "Удалить это сообщение?"
+    "confirmDeleteMessage": "Удалить это сообщение?",
+    "uploadError": "Не удалось загрузить файл. Попробуйте ещё раз."
   },
   "session": {
     "expired": "Сессия завершена",

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import { useEffect } from 'react'
 import { useAuthStore, proactiveRefresh } from './context/authStore'
 import SessionExpiredModal from './components/common/SessionExpiredModal'
+import api from './services/api'
 
 // Layout components
 import MainLayout from './components/layout/MainLayout'
@@ -66,6 +67,16 @@ function App() {
     const handler = () => proactiveRefresh()
     events.forEach(e => window.addEventListener(e, handler, { passive: true }))
     return () => events.forEach(e => window.removeEventListener(e, handler))
+  }, [isAuthenticated])
+
+  // Poll /auth/me every 60 s — if the account is deactivated the 401 will trigger
+  // a refresh attempt, refresh will fail, and session:expired will be dispatched.
+  useEffect(() => {
+    if (!isAuthenticated) return
+    const id = setInterval(() => {
+      api.get('/auth/me').catch(() => {})
+    }, 60_000)
+    return () => clearInterval(id)
   }, [isAuthenticated])
 
   // Show loading spinner only during initial auth check

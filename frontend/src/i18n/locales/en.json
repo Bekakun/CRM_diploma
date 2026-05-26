@@ -662,7 +662,8 @@
     "deleteConversation": "Delete conversation",
     "deleteMessage": "Delete message",
     "confirmDeleteConversation": "Delete this conversation? All messages will be removed.",
-    "confirmDeleteMessage": "Delete this message?"
+    "confirmDeleteMessage": "Delete this message?",
+    "uploadError": "Failed to upload file. Please try again."
   },
   "notifications": {
     "grade": "New grade",

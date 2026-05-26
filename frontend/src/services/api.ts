@@ -53,8 +53,17 @@ api.interceptors.response.use(
 
     // Handle 401 Unauthorized
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      // Don't try to refresh if we're already on auth endpoints
-      if (originalRequest.url?.includes('/auth/')) {
+      // Don't try to refresh on these endpoints (user is not yet logged in, or it would loop)
+      const noRefreshEndpoints = [
+        '/auth/login',
+        '/auth/register',
+        '/auth/refresh',
+        '/auth/verify-email',
+        '/auth/resend-verification',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+      ]
+      if (noRefreshEndpoints.some((ep) => originalRequest.url?.endsWith(ep))) {
         return Promise.reject(error)
       }
 

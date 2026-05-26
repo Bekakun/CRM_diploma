@@ -32,7 +32,7 @@ public class UpdateUserRequest {
 
     private UserRole role;
 
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Некорректный формат телефона")
+    @Pattern(regexp = "^[+]?[0-9\\s\\-().]{7,20}$", message = "Некорректный формат телефона")
     private String phone;
 
     private String profilePhotoUrl;

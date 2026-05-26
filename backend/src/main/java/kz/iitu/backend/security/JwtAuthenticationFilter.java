@@ -58,6 +58,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 5. Создать UserDetails
                 UserDetails userDetails = new CustomUserDetails(user);
 
+                // 5а. Если аккаунт деактивирован — не аутентифицировать
+                if (!userDetails.isEnabled()) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 // 6. Создать Authentication объект
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(

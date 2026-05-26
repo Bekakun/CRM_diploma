@@ -299,10 +299,12 @@ export default function ChatPage() {
     try {
       const form = new FormData()
       form.append('file', file)
-      const res = await api.post<Message>(`/chat/conversations/${activeConv.id}/upload`, form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      // Do NOT set Content-Type manually — Axios + browser must set multipart/form-data with boundary
+      const res = await api.post<Message>(`/chat/conversations/${activeConv.id}/upload`, form)
       setMessages((prev) => [...prev, res.data])
+    } catch (err) {
+      console.error('File upload failed:', err)
+      alert(t('chat.uploadError'))
     } finally {
       setUploadingFile(false)
       if (fileInputRef.current) fileInputRef.current.value = ''

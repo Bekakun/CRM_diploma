@@ -35,7 +35,7 @@ public class RegisterRequest {
     @Size(min = 2, max = 100, message = "Фамилия должна быть от 2 до 100 символов")
     private String lastName;
 
-    @Pattern(regexp = "^\\+?[0-9]{10,20}$", message = "Некорректный формат телефона")
+    @Pattern(regexp = "^[+]?[0-9\\s\\-().]{7,20}$", message = "Некорректный формат телефона")
     private String phone;
 
     /**

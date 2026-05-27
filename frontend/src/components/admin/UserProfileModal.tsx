@@ -165,10 +165,10 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 min-w-0">
       <span className="text-gray-400 shrink-0">{icon}</span>
       <span className="text-xs text-gray-400 dark:text-gray-500 w-24 shrink-0">{label}</span>
-      <span className="text-sm text-gray-800 dark:text-gray-200 font-medium">{value}</span>
+      <span className="text-sm text-gray-800 dark:text-gray-200 font-medium truncate min-w-0">{value}</span>
     </div>
   )
 }

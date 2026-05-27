@@ -304,12 +304,12 @@ export default function ManageUsersPage() {
                                   <Edit className="w-4 h-4" /> {t('common.edit')}
                                 </button>
                               )}
-                              {isSuperAdmin && (
+                              {isSuperAdmin && user.id !== currentUser?.id && (
                                 <button
                                   onClick={() => handleToggleStatus(user)}
                                   className={`w-full text-left px-3.5 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 ${
                                     user.status === 'ACTIVE'
-                                      ? 'text-red-600 dark:text-red-400'
+                                      ? 'text-amber-600 dark:text-amber-400'
                                       : 'text-emerald-600 dark:text-emerald-400'
                                   }`}
                                 >

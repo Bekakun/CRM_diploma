@@ -132,7 +132,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                 </button>
               )}
 
-              {isSuperAdmin && (
+              {isSuperAdmin && user.id !== currentUser?.id && (
                 <button
                   onClick={() => { onToggleStatus(user); onClose() }}
                   className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl font-medium transition-colors border ${
@@ -146,7 +146,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                 </button>
               )}
 
-              {isSuperAdmin && onDelete && (
+              {isSuperAdmin && onDelete && user.id !== currentUser?.id && (
                 <button
                   onClick={() => { onDelete(user); onClose() }}
                   className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl font-medium transition-colors border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40"

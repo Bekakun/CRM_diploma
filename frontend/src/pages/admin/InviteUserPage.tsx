@@ -173,7 +173,7 @@ export default function InviteUserPage() {
               {invitations.map((inv) => (
                 <div
                   key={inv.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 bg-primary-50 dark:bg-primary-900/20 rounded-xl flex items-center justify-center shrink-0">
@@ -185,7 +185,7 @@ export default function InviteUserPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <div className="flex items-center gap-2 flex-wrap pl-12 sm:pl-0 sm:shrink-0">
                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${ROLE_COLOR[inv.role]}`}>
                       {ROLE_LABEL[inv.role]}
                     </span>

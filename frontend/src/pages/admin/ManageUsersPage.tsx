@@ -309,7 +309,7 @@ export default function ManageUsersPage() {
                                   onClick={() => handleToggleStatus(user)}
                                   className={`w-full text-left px-3.5 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 ${
                                     user.status === 'ACTIVE'
-                                      ? 'text-amber-600 dark:text-amber-400'
+                                      ? 'text-orange-600 dark:text-orange-400'
                                       : 'text-emerald-600 dark:text-emerald-400'
                                   }`}
                                 >

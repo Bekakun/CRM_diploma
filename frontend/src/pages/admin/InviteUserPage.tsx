@@ -42,6 +42,13 @@ export default function InviteUserPage() {
     STUDENT: t('roles.STUDENT'),
   }
 
+  const ROLE_COLOR: Record<UserRole, string> = {
+    SUPER_ADMIN: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400',
+    ADMIN:       'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400',
+    INSTRUCTOR:  'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
+    STUDENT:     'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400',
+  }
+
   function formatRelativeDate(dateString: string) {
     const d = new Date(dateString)
     const now = new Date()
@@ -179,7 +186,7 @@ export default function InviteUserPage() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 ml-3">
-                    <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${ROLE_COLOR[inv.role]}`}>
                       {ROLE_LABEL[inv.role]}
                     </span>
                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${

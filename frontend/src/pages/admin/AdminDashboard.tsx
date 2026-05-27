@@ -270,6 +270,16 @@ export default function AdminDashboard() {
           } catch { /* ignore */ }
         }}
         onEnroll={(u) => { setProfileUser(null); setSelectedStudent(u) }}
+        onDelete={async (u) => {
+          try {
+            await api.delete(`/admin/users/${u.id}`)
+            setData(prev => prev ? {
+              ...prev,
+              recentRegistrations: prev.recentRegistrations.filter(r => r.id !== u.id)
+            } : prev)
+            setProfileUser(null)
+          } catch { /* ignore */ }
+        }}
       />
     )}
 

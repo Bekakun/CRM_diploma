@@ -463,26 +463,36 @@ export default function ChatPage() {
                               />
                             </button>
                           ) : (
-                            <a
-                              href={getFileUrl(msg.fileUrl)}
-                              target="_blank"
-                              rel="noreferrer"
-                              download={msg.fileName}
-                              className={`flex items-center gap-2.5 px-4 py-3 hover:opacity-80 transition-opacity ${isMe ? 'text-white' : ''}`}
-                            >
-                              <FileText className="w-5 h-5 shrink-0" />
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium truncate max-w-[180px]">{msg.fileName}</p>
-                                {msg.fileSize && (
-                                  <p className={`text-xs ${isMe ? 'text-primary-200' : 'text-gray-400 dark:text-gray-500'}`}>
-                                    {msg.fileSize < 1024 * 1024
-                                      ? `${(msg.fileSize / 1024).toFixed(1)} KB`
-                                      : `${(msg.fileSize / 1024 / 1024).toFixed(1)} MB`}
-                                  </p>
-                                )}
-                              </div>
-                              <Download className="w-4 h-4 shrink-0 opacity-70" />
-                            </a>
+                            <div className={`flex items-center gap-2.5 px-4 py-3 ${isMe ? 'text-white' : ''}`}>
+                              {/* Клик на имя/иконку — открыть */}
+                              <a
+                                href={getFileUrl(msg.fileUrl)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-2.5 flex-1 min-w-0 hover:opacity-80 transition-opacity"
+                              >
+                                <FileText className="w-5 h-5 shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium truncate max-w-[180px]">{msg.fileName}</p>
+                                  {msg.fileSize && (
+                                    <p className={`text-xs ${isMe ? 'text-primary-200' : 'text-gray-400 dark:text-gray-500'}`}>
+                                      {msg.fileSize < 1024 * 1024
+                                        ? `${(msg.fileSize / 1024).toFixed(1)} KB`
+                                        : `${(msg.fileSize / 1024 / 1024).toFixed(1)} MB`}
+                                    </p>
+                                  )}
+                                </div>
+                              </a>
+                              {/* Клик на иконку — скачать */}
+                              <a
+                                href={getFileUrl(msg.fileUrl)}
+                                download={msg.fileName}
+                                className="shrink-0 p-1.5 rounded-lg hover:opacity-80 transition-opacity"
+                                title="Скачать"
+                              >
+                                <Download className="w-4 h-4" />
+                              </a>
+                            </div>
                           )
                         ) : (
                           <p className="px-4 py-2.5">{msg.content}</p>

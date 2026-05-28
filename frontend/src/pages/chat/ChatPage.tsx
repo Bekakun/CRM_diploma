@@ -292,6 +292,23 @@ export default function ChatPage() {
     }
   }
 
+  const handleDownload = async (url: string, fileName: string) => {
+    try {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = objectUrl
+      a.download = fileName || 'file'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(objectUrl)
+    } catch {
+      window.open(url, '_blank')
+    }
+  }
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !activeConv) return
@@ -483,15 +500,14 @@ export default function ChatPage() {
                                   )}
                                 </div>
                               </a>
-                              {/* Клик на иконку — скачать */}
-                              <a
-                                href={getFileUrl(msg.fileUrl)}
-                                download={msg.fileName}
+                              {/* Клик на иконку — скачать (blob для iOS) */}
+                              <button
+                                onClick={() => handleDownload(getFileUrl(msg.fileUrl), msg.fileName ?? 'file')}
                                 className="shrink-0 p-1.5 rounded-lg hover:opacity-80 transition-opacity"
                                 title="Скачать"
                               >
                                 <Download className="w-4 h-4" />
-                              </a>
+                              </button>
                             </div>
                           )
                         ) : (

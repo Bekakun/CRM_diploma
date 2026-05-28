@@ -666,7 +666,7 @@
     "startConversation": "Начните общение",
     "selectOrStart": "Выберите диалог или начните новый",
     "attachFile": "Прикрепить файл",
-    "inputPlaceholder": "Введите сообщение... (Enter — отправить)",
+    "inputPlaceholder": "Введите сообщение...",
     "deleteConversation": "Удалить диалог",
     "deleteMessage": "Удалить сообщение",
     "confirmDeleteConversation": "Удалить этот диалог? Все сообщения будут удалены.",

@@ -658,7 +658,7 @@
     "startConversation": "Сөйлесуді бастаңыз",
     "selectOrStart": "Диалогты таңдаңыз немесе жаңасын бастаңыз",
     "attachFile": "Файл тіркеу",
-    "inputPlaceholder": "Хабарлама жазыңыз... (Enter — жіберу)",
+    "inputPlaceholder": "Хабарлама жазыңыз...",
     "deleteConversation": "Диалогты жою",
     "deleteMessage": "Хабарламаны жою",
     "confirmDeleteConversation": "Бұл диалогты жою керек пе? Барлық хабарламалар өшіріледі.",

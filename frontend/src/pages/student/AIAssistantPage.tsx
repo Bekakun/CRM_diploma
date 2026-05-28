@@ -341,7 +341,7 @@ export default function AIAssistantPage() {
                   }
                 </div>
 
-                <div className="flex flex-col gap-1 max-w-[75%]">
+                <div className="flex flex-col gap-1 max-w-[90%] sm:max-w-[75%]">
                   <div className={`rounded-2xl px-4 py-3 shadow-sm ${
                     message.sender === 'ai'
                       ? 'bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/60 text-gray-900 dark:text-gray-100 rounded-tl-sm'
@@ -404,24 +404,24 @@ export default function AIAssistantPage() {
 
           {/* Quick questions */}
           {showQuickQuestions && (
-            <div className="px-5 pb-4 border-t border-gray-100/80 dark:border-gray-800/60 pt-4">
-              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3 uppercase tracking-wide flex items-center gap-1.5">
+            <div className="px-3 sm:px-5 pb-3 sm:pb-4 border-t border-gray-100/80 dark:border-gray-800/60 pt-3 sm:pt-4">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-wide flex items-center gap-1.5">
                 <Zap className="w-3 h-3" />
                 {t('student.aiAssistant.quickQuestions')}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                 {quickQuestions.map((q, i) => (
                   <button
                     key={i}
                     onClick={() => { setInputText(q); inputRef.current?.focus() }}
-                    className="text-left p-3
+                    className="text-left p-2 sm:p-3
                                bg-primary-50/60 dark:bg-primary-900/15
                                hover:bg-primary-100 dark:hover:bg-primary-900/30
                                border border-primary-100 dark:border-primary-800/40
                                hover:border-primary-200 dark:hover:border-primary-700/60
                                text-primary-700 dark:text-primary-400
-                               rounded-xl text-sm transition-all duration-200
-                               hover:-translate-y-0.5 hover:shadow-sm"
+                               rounded-xl text-xs sm:text-sm transition-all duration-200
+                               hover:-translate-y-0.5 hover:shadow-sm leading-snug"
                   >
                     {q}
                   </button>

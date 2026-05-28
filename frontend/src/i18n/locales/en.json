@@ -666,7 +666,7 @@
     "startConversation": "Start a conversation",
     "selectOrStart": "Select a conversation or start a new one",
     "attachFile": "Attach file",
-    "inputPlaceholder": "Type a message... (Enter — send)",
+    "inputPlaceholder": "Type a message...",
     "deleteConversation": "Delete conversation",
     "deleteMessage": "Delete message",
     "confirmDeleteConversation": "Delete this conversation? All messages will be removed.",

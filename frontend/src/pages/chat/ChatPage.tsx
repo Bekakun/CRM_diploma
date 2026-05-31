@@ -434,7 +434,7 @@ export default function ChatPage() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+          <div className="flex-1 overflow-y-auto px-3 sm:px-5 py-4 space-y-3">
             {loadingMsgs ? (
               <div className="flex justify-center py-8">
                 <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
@@ -447,7 +447,7 @@ export default function ChatPage() {
                 return (
                   <div key={msg.id} className={`group flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                     {!isMe && <Avatar name={msg.senderName} url={msg.senderAvatar} size="sm" />}
-                    <div className={`max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+                    <div className={`max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                       <div className={`flex items-end gap-1.5 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                       {isMe && (
                         <button

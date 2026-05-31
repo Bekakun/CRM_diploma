@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../../context/authStore'
 import { useTranslation } from 'react-i18next'
-import { Sparkles, Mail, Lock, ArrowRight, BookOpen, Users, TrendingUp, Bot } from 'lucide-react'
+import { Sparkles, Mail, Lock, ArrowRight, BookOpen, Users, TrendingUp, Bot, Eye, EyeOff } from 'lucide-react'
 import api from '../../services/api'
 import { authService } from '../../services/authService'
 
@@ -24,6 +24,7 @@ const ORBS = [
 export default function LoginPage() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError]       = useState('')
   const [step, setStep]         = useState<'login' | 'verify'>('login')
   const [code, setCode]         = useState('')
@@ -429,15 +430,23 @@ export default function LoginPage() {
                   </Link>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 dark:text-primary-400 z-10 pointer-events-none" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className="input-field pl-10"
+                    className="input-field pl-10 pr-10"
                     placeholder="••••••••"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(s => !s)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 

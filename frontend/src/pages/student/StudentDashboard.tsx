@@ -203,7 +203,7 @@ export default function StudentDashboard() {
     { label: t('common.homework'), value: String(pendingHomework), icon: Clock, bg: 'bg-orange-50 dark:bg-orange-900/20', iconColor: 'text-orange-600 dark:text-orange-400', onClick: () => navigate('/student/deadlines') },
   ]
 
-  const hour = new Date().getHours()
+  const hour = parseInt(new Intl.DateTimeFormat('ru-RU', { hour: 'numeric', hour12: false, timeZone: 'Asia/Almaty' }).format(new Date()), 10)
   const greeting = hour < 12
     ? t('common.goodMorning')
     : hour < 18

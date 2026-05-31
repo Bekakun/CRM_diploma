@@ -4,7 +4,7 @@ import { useAuthStore } from '../../context/authStore'
 import { authService } from '../../services/authService'
 import { useTranslation } from 'react-i18next'
 import {
-  Sparkles, Mail, User, Phone, ArrowRight,
+  Sparkles, Mail, Lock, User, Phone, ArrowRight,
   ShieldCheck, KeyRound, CheckCircle2,
 } from 'lucide-react'
 import axios from 'axios'
@@ -572,12 +572,13 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Passwords row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t('common.password')} <span className="text-red-500">*</span>
-                  </label>
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t('common.password')} <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
                   <PasswordInput
                     value={formData.password}
                     onChange={handleChange}
@@ -586,45 +587,49 @@ export default function RegisterPage() {
                     className="pl-10"
                     required
                   />
-                  {/* Password strength indicator */}
-                  {formData.password && (
-                    <div className="space-y-1">
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4].map(seg => (
-                          <div
-                            key={seg}
-                            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                              pwdStrength.score >= seg ? pwdStrength.color : 'bg-gray-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <p className={`text-xs font-medium transition-colors duration-200 ${
-                        pwdStrength.score === 1 ? 'text-red-500' :
-                        pwdStrength.score === 2 ? 'text-amber-500' :
-                        pwdStrength.score === 3 ? 'text-lime-600' :
-                        'text-emerald-600'
-                      }`}>
-                        {pwdStrength.label}
-                      </p>
-                    </div>
-                  )}
                 </div>
+                {formData.password && (
+                  <div className="space-y-1">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map(seg => (
+                        <div
+                          key={seg}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                            pwdStrength.score >= seg ? pwdStrength.color : 'bg-gray-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className={`text-xs font-medium transition-colors duration-200 ${
+                      pwdStrength.score === 1 ? 'text-red-500' :
+                      pwdStrength.score === 2 ? 'text-amber-500' :
+                      pwdStrength.score === 3 ? 'text-lime-600' :
+                      'text-emerald-600'
+                    }`}>
+                      {pwdStrength.label}
+                    </p>
+                  </div>
+                )}
+                <p className="text-xs text-gray-400">{t('auth.passwordHint')}</p>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t('auth.confirmPassword')} <span className="text-red-500">*</span>
-                  </label>
+              {/* Confirm password */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t('auth.confirmPassword')} <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
                   <PasswordInput
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     name="confirmPassword"
                     placeholder="••••••••"
+                    className="pl-10"
                     required
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-400 -mt-1">{t('auth.passwordHint')}</p>
 
               {/* Invitation token (if not prefilled) */}
               {!formData.invitationToken && (

@@ -20,6 +20,7 @@ export default function ResetPasswordPage() {
   const [newPassword, setNewPassword]     = useState('')
   const [confirmPassword, setConfirm]     = useState('')
   const [showPassword, setShowPassword]   = useState(false)
+  const [showConfirm, setShowConfirm]     = useState(false)
   const [isLoading, setIsLoading]         = useState(false)
   const [error, setError]                 = useState('')
   const [done, setDone]                   = useState(false)
@@ -223,7 +224,7 @@ export default function ResetPasswordPage() {
                       {t('auth.newPassword')}
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={newPassword}
@@ -247,15 +248,23 @@ export default function ResetPasswordPage() {
                       {t('auth.confirmPassword')}
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
                       <input
-                        type={showPassword ? 'text' : 'password'}
+                        type={showConfirm ? 'text' : 'password'}
                         value={confirmPassword}
                         onChange={e => setConfirm(e.target.value)}
-                        className="input-field pl-10"
+                        className="input-field pl-10 pr-10"
                         placeholder={t('auth.confirmPasswordPlaceholder')}
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm(v => !v)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10"
+                        tabIndex={-1}
+                      >
+                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
 

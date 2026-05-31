@@ -168,8 +168,21 @@ export default function ChatPage() {
   const [deletingConvId, setDeletingConvId] = useState<string | null>(null)
   const [convMenuId, setConvMenuId] = useState<string | null>(null)
   const [deletingMsgId, setDeletingMsgId] = useState<string | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    type: 'clear' | 'delete'
+    convId: string
+    convName: string
+  } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Close conv menu on outside click
+  useEffect(() => {
+    if (!convMenuId) return
+    const handler = () => setConvMenuId(null)
+    const timer = setTimeout(() => document.addEventListener('click', handler), 0)
+    return () => { clearTimeout(timer); document.removeEventListener('click', handler) }
+  }, [convMenuId])
   const [searchParams] = useSearchParams()
   const { user } = useAuthStore()
   const accessToken = tokenStorage.getAccessToken()
@@ -257,9 +270,7 @@ export default function ChatPage() {
     return () => window.removeEventListener('focus', onFocus)
   }, [activeConv?.id])
 
-  const handleDeleteConversation = async (convId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (!window.confirm(t('chat.confirmDeleteConversation'))) return
+  const handleDeleteConversation = async (convId: string) => {
     setDeletingConvId(convId)
     try {
       await api.delete(`/chat/conversations/${convId}`)
@@ -271,12 +282,19 @@ export default function ChatPage() {
   }
 
   const handleClearMessages = async (convId: string) => {
-    if (!window.confirm('Очистить всю историю сообщений?')) return
     try {
       await api.delete(`/chat/conversations/${convId}/messages`)
       if (activeConv?.id === convId) setMessages([])
     } catch { /* ignore */ }
+  }
+
+  const handleConfirmAction = async () => {
+    if (!confirmDialog) return
+    const { type, convId } = confirmDialog
+    setConfirmDialog(null)
     setConvMenuId(null)
+    if (type === 'clear') await handleClearMessages(convId)
+    if (type === 'delete') await handleDeleteConversation(convId)
   }
 
   const handleDeleteMessage = async (msgId: string) => {
@@ -414,18 +432,21 @@ export default function ChatPage() {
                     <MoreVertical className="w-3.5 h-3.5" />
                   </button>
                   {convMenuId === c.id && (
-                    <div className="absolute right-0 top-8 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
+                    <div
+                      className="absolute right-0 top-8 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
-                        onClick={() => handleClearMessages(c.id)}
-                        className="w-full text-left px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                        onClick={() => setConfirmDialog({ type: 'clear', convId: c.id, convName: c.otherUserName })}
+                        className="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                       >
-                        <X className="w-3.5 h-3.5" /> Очистить историю
+                        <X className="w-3.5 h-3.5" /> Очистить чат
                       </button>
                       <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
                       <button
-                        onClick={(e) => { handleDeleteConversation(c.id, e); setConvMenuId(null) }}
+                        onClick={() => setConfirmDialog({ type: 'delete', convId: c.id, convName: c.otherUserName })}
                         disabled={deletingConvId === c.id}
-                        className="w-full text-left px-3.5 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 disabled:opacity-50"
+                        className="w-full text-left px-3.5 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 disabled:opacity-50"
                       >
                         {deletingConvId === c.id
                           ? <div className="w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
@@ -635,6 +656,63 @@ export default function ChatPage() {
           alt={lightboxImage.alt}
           onClose={() => setLightboxImage(null)}
         />
+      )}
+
+      {/* Custom confirm dialog */}
+      {confirmDialog && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-100 dark:border-gray-700 animate-[fadeSlideUp_0.2s_ease_both]">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pt-5 pb-4">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                {confirmDialog.type === 'delete' ? 'Удалить чат?' : 'Очистить чат?'}
+              </h3>
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Warning box */}
+            <div className="mx-5 mb-4 flex items-start gap-3 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+              <Trash2 className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 dark:text-red-300">
+                {confirmDialog.type === 'delete'
+                  ? <>Вы уверены, что хотите удалить чат с <b>{confirmDialog.convName}</b>? Все сообщения будут удалены.</>
+                  : <>Очистить всю историю сообщений с <b>{confirmDialog.convName}</b>?</>
+                }
+              </p>
+            </div>
+
+            {/* Hint */}
+            <p className="px-5 pb-4 text-xs text-gray-400 dark:text-gray-500">
+              Это действие необратимо.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex gap-3 px-5 pb-5">
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleConfirmAction}
+                disabled={!!deletingConvId}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deletingConvId ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  confirmDialog.type === 'delete' ? 'Удалить' : 'Очистить'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

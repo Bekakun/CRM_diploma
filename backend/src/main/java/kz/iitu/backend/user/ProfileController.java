@@ -2,6 +2,7 @@ package kz.iitu.backend.user;
 
 import jakarta.validation.Valid;
 import kz.iitu.backend.security.CustomUserDetails;
+import kz.iitu.backend.shared.email.EmailService;
 import kz.iitu.backend.user.dto.ChangePasswordRequest;
 import kz.iitu.backend.user.dto.UpdateUserRequest;
 import kz.iitu.backend.user.dto.UserResponse;
@@ -25,6 +26,8 @@ import java.util.Map;
 public class ProfileController {
 
     private final UserService userService;
+    private final EmailChangeService emailChangeService;
+    private final EmailService emailService;
 
     /**
      * Получить профиль текущего пользователя
@@ -92,6 +95,55 @@ public class ProfileController {
 
         UserResponse updatedProfile = userService.uploadProfilePhoto(currentUser.getId(), photo);
         return ResponseEntity.ok(updatedProfile);
+    }
+
+    /**
+     * Запросить смену email — отправляет код на новый адрес
+     * POST /api/v1/profile/change-email/request
+     */
+    @PostMapping("/change-email/request")
+    public ResponseEntity<Map<String, String>> requestEmailChange(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        String newEmail = body.get("newEmail");
+        if (newEmail == null || !newEmail.contains("@")) {
+            throw new RuntimeException("Некорректный email");
+        }
+        // Check not already taken
+        if (userService.emailExists(newEmail) && !newEmail.equalsIgnoreCase(currentUser.getEmail())) {
+            throw new RuntimeException("Этот email уже используется");
+        }
+        EmailChangeService.PendingChange change = emailChangeService.createRequest(
+                currentUser.getId().toString(), newEmail);
+        emailService.sendVerificationEmail(newEmail, currentUser.getFirstName(), change.getCode());
+        return ResponseEntity.ok(Map.of("message", "Код отправлен на " + newEmail));
+    }
+
+    /**
+     * Подтвердить смену email
+     * POST /api/v1/profile/change-email/confirm
+     */
+    @PostMapping("/change-email/confirm")
+    public ResponseEntity<Map<String, String>> confirmEmailChange(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        String code = body.get("code");
+        EmailChangeService.PendingChange change = emailChangeService
+                .getRequest(currentUser.getId().toString())
+                .orElseThrow(() -> new RuntimeException("Код устарел или не найден. Запросите новый."));
+
+        if (!change.getCode().equals(code)) {
+            throw new RuntimeException("Неверный код подтверждения");
+        }
+
+        UpdateUserRequest req = new UpdateUserRequest();
+        req.setEmail(change.getNewEmail());
+        userService.updateUser(currentUser.getId(), req);
+        emailChangeService.remove(currentUser.getId().toString());
+
+        return ResponseEntity.ok(Map.of("newEmail", change.getNewEmail()));
     }
 
     /**

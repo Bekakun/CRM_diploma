@@ -41,6 +41,11 @@ public class UserService {
     }
 
     @Transactional
+    public boolean emailExists(String email) {
+        String hash = emailHashUtil.hash(email);
+        return userRepository.existsByEmailHash(hash);
+    }
+
     public UserResponse updateUser(UUID userId, UpdateUserRequest request) {
         log.info("Updating user with ID: {}", userId);
 

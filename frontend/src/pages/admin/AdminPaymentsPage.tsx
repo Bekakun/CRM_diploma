@@ -435,21 +435,21 @@ export default function AdminPaymentsPage() {
             </div>
 
             {/* Date range */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <input
                 type="date"
                 value={dateFrom}
                 onChange={e => { setDateFrom(e.target.value); setCurrentPage(0) }}
-                className="input-field w-36 text-sm"
+                className="input-field flex-1 sm:w-36 text-sm"
                 title={t('admin.payments.dateFrom')}
               />
-              <span className="text-gray-400 text-sm">—</span>
+              <span className="text-gray-400 text-sm shrink-0">—</span>
               <input
                 type="date"
                 value={dateTo}
                 min={dateFrom || undefined}
                 onChange={e => { setDateTo(e.target.value); setCurrentPage(0) }}
-                className="input-field w-36 text-sm"
+                className="input-field flex-1 sm:w-36 text-sm"
                 title={t('admin.payments.dateTo')}
               />
             </div>

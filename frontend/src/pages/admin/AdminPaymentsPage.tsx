@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Plus, Edit, Trash2, X, RefreshCw, CheckCircle, XCircle,
-  ChevronLeft, ChevronRight, ArrowUpDown, Search, MoreVertical,
+  ArrowUpDown, Search, MoreVertical,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../../services/api'

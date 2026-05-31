@@ -116,7 +116,8 @@ public class ProfileController {
         }
         EmailChangeService.PendingChange change = emailChangeService.createRequest(
                 currentUser.getId().toString(), newEmail);
-        emailService.sendVerificationEmail(newEmail, currentUser.getFirstName(), change.getCode());
+        UserResponse profile = userService.getUserById(currentUser.getId());
+        emailService.sendVerificationEmail(newEmail, profile.getFirstName(), change.getCode());
         return ResponseEntity.ok(Map.of("message", "Код отправлен на " + newEmail));
     }
 

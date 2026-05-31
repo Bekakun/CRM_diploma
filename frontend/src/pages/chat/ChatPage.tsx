@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Send, MessageSquare, Search, Plus, X, Paperclip, FileText, Download, Trash2 } from 'lucide-react'
+import { Send, MessageSquare, Search, Plus, X, Paperclip, FileText, Download, Trash2, MoreVertical } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../../services/api'
 import { getFileUrl } from '../../utils/fileUrl'
@@ -166,6 +166,7 @@ export default function ChatPage() {
   const [showNewChat, setShowNewChat] = useState(false)
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null)
   const [deletingConvId, setDeletingConvId] = useState<string | null>(null)
+  const [convMenuId, setConvMenuId] = useState<string | null>(null)
   const [deletingMsgId, setDeletingMsgId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -267,6 +268,15 @@ export default function ChatPage() {
     } finally {
       setDeletingConvId(null)
     }
+  }
+
+  const handleClearMessages = async (convId: string) => {
+    if (!window.confirm('Очистить всю историю сообщений?')) return
+    try {
+      await api.delete(`/chat/conversations/${convId}/messages`)
+      if (activeConv?.id === convId) setMessages([])
+    } catch { /* ignore */ }
+    setConvMenuId(null)
   }
 
   const handleDeleteMessage = async (msgId: string) => {
@@ -396,17 +406,36 @@ export default function ChatPage() {
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{t(`roles.${c.otherUserRole}`)}</p>
                 </div>
-                <button
-                  onClick={(e) => handleDeleteConversation(c.id, e)}
-                  disabled={deletingConvId === c.id}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shrink-0"
-                  title={t('chat.deleteConversation')}
-                >
-                  {deletingConvId === c.id
-                    ? <div className="w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                    : <Trash2 className="w-3.5 h-3.5" />
-                  }
-                </button>
+                <div className="relative shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => setConvMenuId(convMenuId === c.id ? null : c.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                  >
+                    <MoreVertical className="w-3.5 h-3.5" />
+                  </button>
+                  {convMenuId === c.id && (
+                    <div className="absolute right-0 top-8 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
+                      <button
+                        onClick={() => handleClearMessages(c.id)}
+                        className="w-full text-left px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                      >
+                        <X className="w-3.5 h-3.5" /> Очистить историю
+                      </button>
+                      <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+                      <button
+                        onClick={(e) => { handleDeleteConversation(c.id, e); setConvMenuId(null) }}
+                        disabled={deletingConvId === c.id}
+                        className="w-full text-left px-3.5 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {deletingConvId === c.id
+                          ? <div className="w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                          : <Trash2 className="w-3.5 h-3.5" />
+                        }
+                        Удалить чат
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           )}

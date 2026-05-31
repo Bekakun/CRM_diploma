@@ -21,6 +21,10 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
     @Query("UPDATE ChatMessage m SET m.read = true WHERE m.conversation.id = :convId AND m.sender.id <> :userId AND m.read = false")
     void markAllRead(@Param("convId") UUID convId, @Param("userId") UUID userId);
 
+    @Modifying
+    @Query("DELETE FROM ChatMessage m WHERE m.conversation.id = :convId")
+    void deleteAllByConversationId(@Param("convId") UUID convId);
+
     @Query("""
         SELECT COUNT(m) FROM ChatMessage m
         WHERE m.conversation.id IN (

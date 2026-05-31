@@ -120,6 +120,12 @@ public class ChatService {
     }
 
     @Transactional
+    public void clearMessages(UUID conversationId, UUID userId) {
+        ensureParticipant(conversationId, userId);
+        messageRepo.deleteAllByConversationId(conversationId);
+    }
+
+    @Transactional
     public void deleteConversation(UUID conversationId, UUID userId) {
         ensureParticipant(conversationId, userId);
         conversationRepo.deleteById(conversationId);

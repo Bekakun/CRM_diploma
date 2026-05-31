@@ -83,6 +83,14 @@ public class ChatController {
         return ResponseEntity.ok(Map.of("count", chatService.getTotalUnread(me.getId())));
     }
 
+    @DeleteMapping("/conversations/{conversationId}/messages")
+    public ResponseEntity<Void> clearMessages(
+            @PathVariable UUID conversationId,
+            @AuthenticationPrincipal CustomUserDetails me) {
+        chatService.clearMessages(conversationId, me.getId());
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/conversations/{conversationId}")
     public ResponseEntity<Void> deleteConversation(
             @PathVariable UUID conversationId,

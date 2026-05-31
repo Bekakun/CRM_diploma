@@ -24,9 +24,12 @@ export interface RegisterData {
   invitationToken?: string
 }
 
-// Proactive token refresh — called on user activity when token is close to expiry.
-// Access token lives 15 min; we refresh if less than 3 min remain.
-const REFRESH_THRESHOLD_MS = 3 * 60 * 1000
+// Proactive token refresh — called on user activity or tab focus when token is close to expiry.
+// Access token lives 15 min; we refresh if less than 4 min remain (or already expired).
+const REFRESH_THRESHOLD_MS = 4 * 60 * 1000
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+  ? `${import.meta.env.VITE_BACKEND_URL}/api/v1`
+  : '/api/v1'
 
 function getTokenExpiryMs(token: string): number {
   try {
@@ -39,7 +42,7 @@ function getTokenExpiryMs(token: string): number {
 
 let lastActivityRefresh = 0
 
-export function proactiveRefresh() {
+export function proactiveRefresh(force = false) {
   const accessToken = tokenStorage.getAccessToken()
   const refreshToken = tokenStorage.getRefreshToken()
   if (!accessToken || !refreshToken) return
@@ -48,12 +51,12 @@ export function proactiveRefresh() {
   const timeLeft = expiresAt - Date.now()
   const now = Date.now()
 
-  // Debounce — don't refresh more than once per minute
-  if (now - lastActivityRefresh < 60_000) return
+  // Debounce — don't refresh more than once per minute (skip if forced, e.g. on tab focus)
+  if (!force && now - lastActivityRefresh < 60_000) return
   if (timeLeft > REFRESH_THRESHOLD_MS) return
 
   lastActivityRefresh = now
-  axios.post('/api/v1/auth/refresh', { refreshToken })
+  axios.post(`${BACKEND_URL}/auth/refresh`, { refreshToken })
     .then((res) => {
       tokenStorage.setTokens(res.data.accessToken, res.data.refreshToken)
     })

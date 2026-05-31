@@ -69,6 +69,19 @@ function App() {
     return () => events.forEach(e => window.removeEventListener(e, handler))
   }, [isAuthenticated])
 
+  // Refresh token when user returns to the tab after being away
+  // (setInterval is throttled in background, so token may expire unnoticed)
+  useEffect(() => {
+    if (!isAuthenticated) return
+    const handler = () => {
+      if (document.visibilityState === 'visible') {
+        proactiveRefresh(true) // force — bypass debounce on tab return
+      }
+    }
+    document.addEventListener('visibilitychange', handler)
+    return () => document.removeEventListener('visibilitychange', handler)
+  }, [isAuthenticated])
+
   // Poll /auth/me every 60 s — if the account is deactivated the 401 will trigger
   // a refresh attempt, refresh will fail, and session:expired will be dispatched.
   useEffect(() => {

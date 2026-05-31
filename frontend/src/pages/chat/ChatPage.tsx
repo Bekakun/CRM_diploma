@@ -409,7 +409,7 @@ export default function ChatPage() {
                 <div className="relative shrink-0" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => setConvMenuId(convMenuId === c.id ? null : c.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                    className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                   >
                     <MoreVertical className="w-3.5 h-3.5" />
                   </button>

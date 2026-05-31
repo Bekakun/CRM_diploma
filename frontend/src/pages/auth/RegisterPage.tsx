@@ -4,7 +4,7 @@ import { useAuthStore } from '../../context/authStore'
 import { authService } from '../../services/authService'
 import { useTranslation } from 'react-i18next'
 import {
-  Sparkles, Mail, Lock, User, Phone, ArrowRight,
+  Sparkles, Mail, User, Phone, ArrowRight,
   ShieldCheck, KeyRound, CheckCircle2,
 } from 'lucide-react'
 import axios from 'axios'

@@ -214,7 +214,70 @@ export default function ManageUsersPage() {
             </select>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile card list */}
+          <div className="sm:hidden space-y-2">
+            {isLoading ? (
+              <div className="py-8 flex justify-center"><div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>
+            ) : filteredUsers.length === 0 ? (
+              <EmptyState icon={Users} title={searchQuery ? t('admin.users.notFound') : t('admin.users.noUsers')} />
+            ) : filteredUsers.map((user) => (
+              <div key={user.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700"
+                onClick={() => { setOpenMenuId(null); setProfileUser(user) }}>
+                <div className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center overflow-hidden shrink-0">
+                  {user.profilePhotoUrl
+                    ? <img src={getFileUrl(user.profilePhotoUrl)} alt="" className="w-full h-full object-cover" />
+                    : <span className="text-white font-semibold text-xs">{user.firstName?.[0]}{user.lastName?.[0]}</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user.firstName} {user.lastName}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{user.email}</p>
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${ROLE_COLORS[user.role]}`}>{ROLE_LABELS[user.role]}</span>
+                <div className="relative shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <MoreVertical className="w-4 h-4 text-gray-400" />
+                  </button>
+                  {openMenuId === user.id && (
+                    <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
+                      {isSuperAdmin && user.role === 'STUDENT' && (
+                        <button onClick={() => { setSelectedStudent(user); setOpenMenuId(null) }}
+                          className="w-full text-left px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                          <BookOpen className="w-4 h-4" /> {t('admin.users.enrollStudent')}
+                        </button>
+                      )}
+                      {isSuperAdmin && (
+                        <button onClick={() => openEdit(user)}
+                          className="w-full text-left px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                          <Edit className="w-4 h-4" /> {t('common.edit')}
+                        </button>
+                      )}
+                      {isSuperAdmin && user.id !== currentUser?.id && (
+                        <button onClick={() => handleToggleStatus(user)}
+                          className={`w-full text-left px-3.5 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 ${user.status === 'ACTIVE' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                          <Ban className="w-4 h-4" />
+                          {user.status === 'ACTIVE' ? t('admin.users.deactivate') : t('admin.users.activate')}
+                        </button>
+                      )}
+                      {isSuperAdmin && user.id !== currentUser?.id && (
+                        <>
+                          <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+                          <button onClick={() => { setDeletingUser(user); setOpenMenuId(null) }}
+                            className="w-full text-left px-3.5 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                            <Trash2 className="w-4 h-4" /> {t('admin.users.deleteUser')}
+                          </button>
+                        </>
+                      )}
+                      {!isSuperAdmin && <p className="px-3.5 py-2 text-xs text-gray-400">{t('admin.users.viewOnly')}</p>}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-gray-800">

@@ -49,6 +49,7 @@
     "goodMorning": "Good morning,",
     "goodAfternoon": "Good afternoon,",
     "goodEvening": "Good evening,",
+    "goodNight": "Good night,",
     "daysAgo": "{{count}} days ago",
     "inDays": "In {{count}} days",
     "lessThanHour": "Less than an hour",
@@ -472,7 +473,8 @@
       "topStudents": "Top students",
       "bottomStudents": "Need attention",
       "totalStudentsLabel": "Total: {{count}} students",
-      "selectCourse": "Select course"
+      "selectCourse": "Select course",
+      "noGrades": "No data yet. Select a course and make sure students have submitted their work."
     },
     "calendar": {
       "title": "Calendar",

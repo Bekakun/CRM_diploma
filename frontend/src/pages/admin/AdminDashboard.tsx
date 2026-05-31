@@ -86,8 +86,8 @@ export default function AdminDashboard() {
     { label: t('admin.dashboard.activeAccounts'), value: data.activeUsersPercent, color: 'bg-emerald-500' },
   ] : []
 
-  const hour = parseInt(new Intl.DateTimeFormat('ru-RU', { hour: 'numeric', hour12: false, timeZone: 'Asia/Almaty' }).format(new Date()), 10)
-  const greeting = hour < 12 ? t('common.goodMorning') : hour < 18 ? t('common.goodAfternoon') : t('common.goodEvening')
+  const hour = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Almaty' })).getHours()
+  const greeting = hour < 6 ? t('common.goodNight') : hour < 12 ? t('common.goodMorning') : hour < 18 ? t('common.goodAfternoon') : t('common.goodEvening')
 
   const openEdit = (user: RecentUser) => {
     setEditingUser(user)

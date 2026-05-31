@@ -49,6 +49,7 @@
     "goodMorning": "Доброе утро,",
     "goodAfternoon": "Добрый день,",
     "goodEvening": "Добрый вечер,",
+    "goodNight": "Доброй ночи,",
     "daysAgo": "{{count}} дн. назад",
     "inDays": "Через {{count}} дн.",
     "lessThanHour": "Менее часа",
@@ -472,7 +473,8 @@
       "topStudents": "Лучшие студенты",
       "bottomStudents": "Требуют внимания",
       "totalStudentsLabel": "Всего: {{count}} студентов",
-      "selectCourse": "Выберите курс"
+      "selectCourse": "Выберите курс",
+      "noGrades": "Данных пока нет. Выберите курс и убедитесь, что студенты сдали работы."
     },
     "calendar": {
       "title": "Календарь",

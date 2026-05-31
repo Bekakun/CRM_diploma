@@ -49,6 +49,7 @@
     "goodMorning": "Қайырлы таң,",
     "goodAfternoon": "Қайырлы күн,",
     "goodEvening": "Қайырлы кеш,",
+    "goodNight": "Қайырлы түн,",
     "daysAgo": "{{count}} күн бұрын",
     "inDays": "{{count}} күннен кейін",
     "lessThanHour": "Бір сағаттан аз",
@@ -464,7 +465,8 @@
       "topStudents": "Үздік студенттер",
       "bottomStudents": "Назар аудару қажет",
       "totalStudentsLabel": "Барлығы: {{count}} студент",
-      "selectCourse": "Курсты таңдаңыз"
+      "selectCourse": "Курсты таңдаңыз",
+      "noGrades": "Деректер әлі жоқ. Курсты таңдаңыз және студенттердің жұмыстарын тапсырғанын тексеріңіз."
     },
     "calendar": {
       "title": "Күнтізбе",

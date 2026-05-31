@@ -434,7 +434,7 @@ export default function ChatPage() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-3 sm:px-5 py-4 space-y-3">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-5 py-4 space-y-3">
             {loadingMsgs ? (
               <div className="flex justify-center py-8">
                 <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
@@ -462,7 +462,7 @@ export default function ChatPage() {
                           }
                         </button>
                       )}
-                      <div className={`rounded-2xl text-sm leading-relaxed break-words overflow-hidden ${
+                      <div className={`rounded-2xl text-sm leading-relaxed break-all overflow-hidden ${
                         isMe
                           ? 'bg-primary-600 text-white rounded-tr-sm'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-sm'
@@ -511,7 +511,16 @@ export default function ChatPage() {
                             </div>
                           )
                         ) : (
-                          <p className="px-4 py-2.5">{msg.content}</p>
+                          <p className="px-4 py-2.5 break-all whitespace-pre-wrap">
+                            {msg.content?.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+                              /^https?:\/\//.test(part)
+                                ? <a key={i} href={part} target="_blank" rel="noreferrer"
+                                    className={`underline ${isMe ? 'text-white/90' : 'text-primary-600 dark:text-primary-400'}`}>
+                                    {part}
+                                  </a>
+                                : part
+                            )}
+                          </p>
                         )}
                       </div>
                       </div>

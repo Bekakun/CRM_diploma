@@ -32,10 +32,61 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
   const [pw, setPw] = useState({ current: '', next: '', confirm: '' })
   const [pwLoading, setPwLoading] = useState(false)
 
+  // Email change state
+  const [emailStep, setEmailStep] = useState<'idle' | 'input' | 'code'>('idle')
+  const [newEmail, setNewEmail] = useState('')
+  const [emailCode, setEmailCode] = useState('')
+  const [emailLoading, setEmailLoading] = useState(false)
+
+  const handleRequestEmailChange = async () => {
+    if (!newEmail || !newEmail.includes('@')) return
+    setEmailLoading(true)
+    try {
+      await api.post('/profile/change-email/request', { newEmail })
+      setEmailStep('code')
+      showToast(`Код отправлен на ${newEmail}`, 'success')
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || 'Ошибка отправки кода', 'error')
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
+  const handleConfirmEmailChange = async () => {
+    if (emailCode.length < 6) return
+    setEmailLoading(true)
+    try {
+      const res = await api.post<{ newEmail: string }>('/profile/change-email/confirm', { code: emailCode })
+      updateUser({ email: res.data.newEmail })
+      showToast('Email успешно изменён', 'success')
+      setEmailStep('idle')
+      setNewEmail('')
+      setEmailCode('')
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || 'Неверный код', 'error')
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
   const [tgLinked, setTgLinked] = useState(false)
   const [tgCode, setTgCode] = useState<string | null>(null)
   const [tgCodeLoading, setTgCodeLoading] = useState(false)
   const [tgUnlinking, setTgUnlinking] = useState(false)
+
+  useEffect(() => {
+    // Fetch fresh profile to get up-to-date phone/name
+    api.get<{ firstName: string; lastName: string; phone?: string; email?: string }>('/auth/me')
+      .then(res => {
+        setFormData(prev => ({
+          ...prev,
+          firstName: res.data.firstName ?? prev.firstName,
+          lastName: res.data.lastName ?? prev.lastName,
+          phone: res.data.phone ?? prev.phone,
+        }))
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     api.get<{ linked: boolean }>('/telegram/status')
@@ -276,13 +327,46 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
               />
             </FormField>
 
-            <FormField label={t('common.email')} hint={t('settings.emailHint')}>
-              <input
-                type="email"
-                value={user?.email ?? ''}
-                className="input-field opacity-60 cursor-not-allowed"
-                disabled
-              />
+            <FormField label={t('common.email')}>
+              {emailStep === 'idle' && (
+                <div className="flex gap-2 items-center">
+                  <input type="email" value={user?.email ?? ''} className="input-field flex-1 opacity-60 cursor-not-allowed" disabled />
+                  <button type="button" onClick={() => setEmailStep('input')}
+                    className="btn-secondary text-xs px-3 py-2 shrink-0">
+                    Сменить
+                  </button>
+                </div>
+              )}
+              {emailStep === 'input' && (
+                <div className="space-y-2">
+                  <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)}
+                    placeholder="Новый email" className="input-field" autoFocus />
+                  <div className="flex gap-2">
+                    <button type="button" onClick={handleRequestEmailChange} disabled={emailLoading || !newEmail.includes('@')}
+                      className="btn-primary text-xs px-3 py-2 disabled:opacity-50">
+                      {emailLoading ? 'Отправка...' : 'Отправить код'}
+                    </button>
+                    <button type="button" onClick={() => { setEmailStep('idle'); setNewEmail('') }}
+                      className="btn-secondary text-xs px-3 py-2">Отмена</button>
+                  </div>
+                </div>
+              )}
+              {emailStep === 'code' && (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500">Код отправлен на <b>{newEmail}</b></p>
+                  <input type="text" inputMode="numeric" maxLength={6} value={emailCode}
+                    onChange={e => setEmailCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000" className="input-field text-center tracking-widest font-mono" autoFocus />
+                  <div className="flex gap-2">
+                    <button type="button" onClick={handleConfirmEmailChange} disabled={emailLoading || emailCode.length < 6}
+                      className="btn-primary text-xs px-3 py-2 disabled:opacity-50">
+                      {emailLoading ? 'Проверка...' : 'Подтвердить'}
+                    </button>
+                    <button type="button" onClick={() => { setEmailStep('idle'); setNewEmail(''); setEmailCode('') }}
+                      className="btn-secondary text-xs px-3 py-2">Отмена</button>
+                  </div>
+                </div>
+              )}
             </FormField>
 
             <FormField label={t('common.phone')}>

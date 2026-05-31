@@ -3,6 +3,8 @@ package kz.iitu.backend.user;
 import jakarta.validation.Valid;
 import kz.iitu.backend.security.CustomUserDetails;
 import kz.iitu.backend.shared.email.EmailService;
+import kz.iitu.backend.shared.exception.BadRequestException;
+import kz.iitu.backend.shared.exception.ConflictException;
 import kz.iitu.backend.user.dto.ChangePasswordRequest;
 import kz.iitu.backend.user.dto.UpdateUserRequest;
 import kz.iitu.backend.user.dto.UserResponse;
@@ -108,11 +110,11 @@ public class ProfileController {
     ) {
         String newEmail = body.get("newEmail");
         if (newEmail == null || !newEmail.contains("@")) {
-            throw new RuntimeException("Некорректный email");
+            throw new BadRequestException("Некорректный email");
         }
         // Check not already taken
         if (userService.emailExists(newEmail) && !newEmail.equalsIgnoreCase(currentUser.getEmail())) {
-            throw new RuntimeException("Этот email уже используется");
+            throw new ConflictException("Этот email уже используется");
         }
         EmailChangeService.PendingChange change = emailChangeService.createRequest(
                 currentUser.getId().toString(), newEmail);
@@ -133,10 +135,10 @@ public class ProfileController {
         String code = body.get("code");
         EmailChangeService.PendingChange change = emailChangeService
                 .getRequest(currentUser.getId().toString())
-                .orElseThrow(() -> new RuntimeException("Код устарел или не найден. Запросите новый."));
+                .orElseThrow(() -> new BadRequestException("Код устарел или не найден. Запросите новый."));
 
         if (!change.getCode().equals(code)) {
-            throw new RuntimeException("Неверный код подтверждения");
+            throw new BadRequestException("Неверный код подтверждения");
         }
 
         UpdateUserRequest req = new UpdateUserRequest();

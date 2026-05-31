@@ -424,35 +424,49 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
 
   const presentCount = Object.values(attendance).filter((s) => s === 'PRESENT').length
 
+  const statusLabel: Record<string, string> = {
+    SCHEDULED: 'Запланировано',
+    IN_PROGRESS: 'Идёт',
+    COMPLETED: 'Завершено',
+    CANCELLED: 'Отменено',
+  }
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {editMode ? 'Редактировать занятие' : lesson.title}
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {lesson.courseName} • {displayDate} • {displayTime}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {!editMode && (
-              <button
-                onClick={() => setEditMode(true)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-              >
-                <Pencil className="w-4 h-4" />
-                Редактировать
+    <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-4xl max-h-[94vh] sm:max-h-[90vh] flex flex-col">
+
+        {/* Sticky header */}
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700
+                        px-4 sm:px-6 py-4 rounded-t-2xl sm:rounded-t-2xl z-10 shrink-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
+                {editMode ? 'Редактировать занятие' : lesson.title}
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                {lesson.courseName} • {displayDate} • {displayTime}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              {!editMode && (
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-2 text-sm font-medium text-primary-600 dark:text-primary-400
+                             hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-xl transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                  <span className="hidden sm:inline">Редактировать</span>
+                </button>
+              )}
+              <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
               </button>
-            )}
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-              <X className="w-5 h-5" />
-            </button>
+            </div>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        {/* Scrollable body */}
+        <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-5 space-y-5">
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
               {error}
@@ -473,7 +487,7 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
                   className="input-field"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Дата <span className="text-red-500">*</span>
@@ -777,73 +791,64 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
 
           {!editMode && (
             <>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              {/* Info chips */}
+              <div className="flex flex-wrap gap-2 text-sm">
                 {lesson.location && (
-                  <div>
-                    <span className="font-medium text-gray-700 dark:text-gray-300">Место: </span>
-                    <span className="text-gray-900 dark:text-gray-100">{lesson.location}</span>
-                  </div>
-                )}
-                {lesson.onlineMeetingUrl && (
-                  <div>
-                    <span className="font-medium text-gray-700 dark:text-gray-300">Онлайн: </span>
-                    <a
-                      href={lesson.onlineMeetingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 hover:text-primary-700 flex items-center gap-1 inline-flex"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      Ссылка
-                    </a>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl">
+                    📍 {lesson.location}
+                  </span>
                 )}
                 {lesson.durationMinutes && (
-                  <div>
-                    <span className="font-medium text-gray-700 dark:text-gray-300">Длительность: </span>
-                    <span className="text-gray-900 dark:text-gray-100">{lesson.durationMinutes} мин</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl">
+                    ⏱ {lesson.durationMinutes} мин
+                  </span>
                 )}
-                <div>
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Статус: </span>
-                  <span className="text-gray-900 dark:text-gray-100">{lesson.status}</span>
-                </div>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium ${
+                  lesson.status === 'COMPLETED' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
+                  lesson.status === 'IN_PROGRESS' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
+                  lesson.status === 'CANCELLED' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
+                  'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                }`}>
+                  {statusLabel[lesson.status] ?? lesson.status}
+                </span>
+                {lesson.onlineMeetingUrl && (
+                  <a href={lesson.onlineMeetingUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-xl">
+                    <ExternalLink className="w-3.5 h-3.5" /> Онлайн
+                  </a>
+                )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {/* Recording URL */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Ссылка на видеозапись
                 </label>
+                <div className="relative">
+                  <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <input
+                    type="url"
+                    value={recordingUrl}
+                    onChange={(e) => setRecordingUrl(e.target.value)}
+                    className="input-field pl-9"
+                    placeholder="https://example.com/recording"
+                  />
+                </div>
                 <div className="flex gap-2">
-                  <div className="flex-1 relative">
-                    <Video className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      type="url"
-                      value={recordingUrl}
-                      onChange={(e) => setRecordingUrl(e.target.value)}
-                      className="input-field pl-10"
-                      placeholder="https://example.com/recording"
-                    />
-                  </div>
+                  <button
+                    onClick={handleSaveRecording}
+                    disabled={savingRecording}
+                    className="btn-primary flex-1 sm:flex-none disabled:opacity-50"
+                  >
+                    {savingRecording ? 'Сохранение...' : 'Сохранить запись'}
+                  </button>
                   {recordingUrl && (
-                    <a
-                      href={recordingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-secondary flex items-center gap-2"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Открыть
+                    <a href={recordingUrl} target="_blank" rel="noopener noreferrer"
+                      className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none">
+                      <ExternalLink className="w-4 h-4" /> Открыть
                     </a>
                   )}
                 </div>
-                <button
-                  onClick={handleSaveRecording}
-                  disabled={savingRecording}
-                  className="mt-2 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {savingRecording ? 'Сохранение...' : 'Сохранить запись'}
-                </button>
               </div>
 
               {/* Посещаемость + ДЗ + оценки */}
@@ -858,67 +863,69 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
                   </div>
                 ) : (
                   <>
-                    <div className="space-y-3 mb-4">
+                    <div className="space-y-2 mb-4">
                       {students.map((student) => {
                         const sub = submissionByUserId[student.userId]
                         const isEditing = sub ? editingGradeIds.has(sub.id) : false
                         const hasGrade = sub?.grade != null
+                        const isPresent = attendance[student.userId] === 'PRESENT'
 
                         return (
                           <div
                             key={student.userId}
-                            className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                            className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
                           >
                             {/* Строка студента */}
-                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700">
-                              <span className="font-medium text-gray-900 dark:text-gray-100">
-                                {student.firstName} {student.lastName}
-                              </span>
-                              <div className="flex items-center gap-2">
-                                {/* Статус ДЗ */}
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/60">
+                              {/* Аватар */}
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shrink-0">
+                                <span className="text-white text-xs font-bold">
+                                  {student.firstName[0]}{student.lastName[0]}
+                                </span>
+                              </div>
+
+                              {/* Имя + бейдж ДЗ */}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                                  {student.firstName} {student.lastName}
+                                </p>
                                 {homework && (
-                                  <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium ${
+                                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium mt-0.5 ${
                                     sub
                                       ? sub.isLate
                                         ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
-                                        : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                      : 'bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
+                                        : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                                   }`}>
                                     <BookOpen className="w-3 h-3" />
-                                    {sub ? (sub.isLate ? 'Сдано с опозданием' : 'Сдано') : 'Не сдано'}
+                                    {sub ? (sub.isLate ? 'С опозданием' : 'Сдано') : 'Не сдано'}
                                   </span>
                                 )}
-                                {/* Посещаемость */}
-                                <label className="flex items-center gap-2 cursor-pointer select-none">
-                                  <span className="text-sm text-gray-500 dark:text-gray-400">Посещаемость</span>
-                                  <div
-                                    onClick={() => toggleAttendance(student.userId)}
-                                    className={`relative w-5 h-5 rounded flex items-center justify-center border-2 transition-colors ${
-                                      attendance[student.userId] === 'PRESENT'
-                                        ? 'bg-emerald-500 border-emerald-500'
-                                        : 'bg-transparent border-gray-400 dark:border-gray-500 hover:border-emerald-400'
-                                    }`}
-                                  >
-                                    {attendance[student.userId] === 'PRESENT' && (
-                                      <CheckCircle className="w-3.5 h-3.5 text-white" />
-                                    )}
-                                  </div>
-                                </label>
                               </div>
+
+                              {/* Чекбокс посещаемости — большой touch target */}
+                              <button
+                                type="button"
+                                onClick={() => toggleAttendance(student.userId)}
+                                className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border-2 transition-all ${
+                                  isPresent
+                                    ? 'bg-emerald-500 border-emerald-500'
+                                    : 'bg-transparent border-gray-300 dark:border-gray-600 hover:border-emerald-400'
+                                }`}
+                                title={isPresent ? 'Присутствует' : 'Отметить присутствие'}
+                              >
+                                {isPresent && <CheckCircle className="w-5 h-5 text-white" />}
+                              </button>
                             </div>
 
-                            {/* Блок ДЗ — только если есть сабмит */}
+                            {/* Блок ДЗ */}
                             {sub && (
-                              <div className="px-3 pb-3 pt-2 bg-white dark:bg-gray-800 space-y-2">
-                                {/* Ссылка на GitHub */}
+                              <div className="px-3 pb-3 pt-2 space-y-2 bg-white dark:bg-gray-800">
+                                {/* GitHub ссылка */}
                                 <div className="flex items-center gap-2 text-sm">
-                                  <Github className="w-4 h-4 text-gray-500 shrink-0" />
-                                  <a
-                                    href={sub.githubUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-primary-600 dark:text-primary-400 hover:underline truncate"
-                                  >
+                                  <Github className="w-4 h-4 text-gray-400 shrink-0" />
+                                  <a href={sub.githubUrl} target="_blank" rel="noopener noreferrer"
+                                    className="text-primary-600 dark:text-primary-400 hover:underline truncate flex-1 min-w-0 text-xs sm:text-sm">
                                     {sub.githubUrl}
                                   </a>
                                   <span className="text-gray-400 text-xs shrink-0">
@@ -926,71 +933,54 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
                                   </span>
                                 </div>
 
-                                {/* Оценка — просмотр */}
+                                {/* Оценка просмотр */}
                                 {hasGrade && !isEditing && (
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                      <Star className="w-4 h-4 text-yellow-500" />
-                                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                        {sub.grade}/100
-                                      </span>
+                                      <Star className="w-4 h-4 text-yellow-500 shrink-0" />
+                                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{sub.grade}/100</span>
                                       {sub.feedback && (
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                                          — {sub.feedback}
-                                        </span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate">— {sub.feedback}</span>
                                       )}
                                     </div>
-                                    <button
-                                      onClick={() => startEditGrade(sub)}
-                                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                                    >
-                                      <RotateCcw className="w-3 h-3" />
-                                      Изменить
+                                    <button onClick={() => startEditGrade(sub)}
+                                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 shrink-0">
+                                      <RotateCcw className="w-3 h-3" /> Изменить
                                     </button>
                                   </div>
                                 )}
 
-                                {/* Форма выставления/редактирования оценки */}
+                                {/* Форма оценки */}
                                 {(!hasGrade || isEditing) && (
-                                  <div className="flex items-center gap-2">
-                                    <div className="relative w-28 shrink-0">
+                                  <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                      <div className="relative w-24 shrink-0">
+                                        <input
+                                          type="number" min="0" max="100" placeholder="0–100"
+                                          value={gradeInputs[sub.id] ?? ''}
+                                          onChange={(e) => setGradeInputs((prev) => ({ ...prev, [sub.id]: e.target.value }))}
+                                          className="input-field pr-7 text-sm"
+                                        />
+                                        <Star className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-yellow-400 pointer-events-none" />
+                                      </div>
                                       <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        placeholder="0–100"
-                                        value={gradeInputs[sub.id] ?? ''}
-                                        onChange={(e) =>
-                                          setGradeInputs((prev) => ({ ...prev, [sub.id]: e.target.value }))
-                                        }
-                                        className="input-field pr-8 text-sm"
+                                        type="text" placeholder="Комментарий"
+                                        value={feedbackInputs[sub.id] ?? ''}
+                                        onChange={(e) => setFeedbackInputs((prev) => ({ ...prev, [sub.id]: e.target.value }))}
+                                        className="input-field text-sm flex-1 min-w-0"
                                       />
-                                      <Star className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-yellow-400 pointer-events-none" />
                                     </div>
-                                    <input
-                                      type="text"
-                                      placeholder="Комментарий (необязательно)"
-                                      value={feedbackInputs[sub.id] ?? ''}
-                                      onChange={(e) =>
-                                        setFeedbackInputs((prev) => ({ ...prev, [sub.id]: e.target.value }))
-                                      }
-                                      className="input-field text-sm flex-1"
-                                    />
-                                    <button
-                                      onClick={() => handleGrade(sub.id)}
-                                      disabled={gradingId === sub.id}
-                                      className="btn-primary text-sm px-3 py-2 shrink-0 disabled:opacity-50"
-                                    >
-                                      {gradingId === sub.id ? '...' : hasGrade ? 'Сохранить' : 'Оценить'}
-                                    </button>
-                                    {isEditing && (
-                                      <button
-                                        onClick={() => cancelEditGrade(sub.id)}
-                                        className="btn-secondary text-sm px-3 py-2 shrink-0"
-                                      >
-                                        Отмена
+                                    <div className="flex gap-2">
+                                      <button onClick={() => handleGrade(sub.id)} disabled={gradingId === sub.id}
+                                        className="btn-primary text-sm flex-1 disabled:opacity-50">
+                                        {gradingId === sub.id ? '...' : hasGrade ? 'Сохранить' : 'Оценить'}
                                       </button>
-                                    )}
+                                      {isEditing && (
+                                        <button onClick={() => cancelEditGrade(sub.id)} className="btn-secondary text-sm flex-1">
+                                          Отмена
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -1011,8 +1001,8 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
                 )}
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button onClick={onClose} className="btn-secondary flex-1">
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button onClick={onClose} className="btn-secondary w-full sm:w-auto">
                   Закрыть
                 </button>
               </div>

@@ -164,21 +164,29 @@ export default function InstructorDashboard() {
           {!isLoading && (
             <div
               onClick={() => navigate('/instructor/students')}
-              className="text-center bg-white/15 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/20 shrink-0
+              className="flex items-center gap-3
+                         w-full sm:w-auto
+                         bg-white/15 backdrop-blur-sm
+                         rounded-2xl px-4 py-3
+                         border border-white/20
                          cursor-pointer group
-                         hover:bg-white/25 hover:border-white/40 hover:scale-105
+                         hover:bg-white/25 hover:border-white/40
                          active:scale-95
                          transition-all duration-200"
             >
-              <div className="flex items-center gap-1.5 justify-center mb-0.5">
-                <GraduationCap className="w-4 h-4 text-cyan-200 group-hover:text-white transition-colors" />
-                <span className="text-xs text-primary-100/70 font-medium group-hover:text-white/90 transition-colors">
-                  {t('instructor.dashboard.totalStudents')}
-                </span>
+              <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center shrink-0
+                              group-hover:bg-white/30 transition-colors">
+                <GraduationCap className="w-5 h-5 text-white" />
               </div>
-              <p className="text-3xl font-bold group-hover:scale-110 transition-transform duration-200 inline-block">
-                {totalStudents}
-              </p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-white/60 font-medium uppercase tracking-wider leading-none">
+                  {t('instructor.dashboard.totalStudents')}
+                </p>
+                <p className="text-3xl font-bold leading-tight mt-0.5 group-hover:scale-105 transition-transform duration-200 inline-block">
+                  {totalStudents}
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
             </div>
           )}
         </div>

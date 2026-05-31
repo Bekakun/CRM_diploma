@@ -1,6 +1,9 @@
 package kz.iitu.backend.user;
 
 import kz.iitu.backend.shared.encryption.EmailHashUtil;
+import kz.iitu.backend.shared.exception.BadRequestException;
+import kz.iitu.backend.shared.exception.ConflictException;
+import kz.iitu.backend.shared.exception.ResourceNotFoundException;
 import kz.iitu.backend.shared.storage.FileStorageService;
 import kz.iitu.backend.student.StudentRepository;
 import kz.iitu.backend.user.dto.ChangePasswordRequest;
@@ -50,12 +53,12 @@ public class UserService {
         log.info("Updating user with ID: {}", userId);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден с ID: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден с ID: " + userId));
 
         if (request.getEmail() != null) {
             String newEmailHash = emailHashUtil.hash(request.getEmail());
             if (!newEmailHash.equals(user.getEmailHash()) && userRepository.existsByEmailHash(newEmailHash)) {
-                throw new RuntimeException("Email уже используется");
+                throw new ConflictException("Email уже используется");
             }
             user.setEmail(request.getEmail());
             user.setEmailHash(newEmailHash);
@@ -95,7 +98,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден с ID: " + userId));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Неверный текущий пароль");
+            throw new BadRequestException("Неверный текущий пароль");
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));

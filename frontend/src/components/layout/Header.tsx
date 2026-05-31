@@ -179,7 +179,7 @@ export default function Header({ onMenuClick }: Props) {
           >
             <Menu size={19} />
           </button>
-          <div className="min-w-0">
+          <div className="min-w-0 hidden sm:block">
             <h2 className="text-[15px] font-semibold text-gray-900 dark:text-gray-100 truncate">
               {t('common.welcomeBack')}{' '}
               <span className="text-gradient font-bold">{user?.firstName}</span>

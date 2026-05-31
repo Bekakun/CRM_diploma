@@ -8,6 +8,7 @@ import {
   ShieldCheck, KeyRound, CheckCircle2,
 } from 'lucide-react'
 import axios from 'axios'
+import PasswordInput from '../../components/common/PasswordInput'
 
 const ORBS = [
   { ox: -200, oy: -180, size: 380, color: 'rgba(99,102,241,0.22)',  speed: 0.035 },
@@ -577,18 +578,14 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-gray-700">
                     {t('common.password')} <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 dark:text-primary-400 z-10 pointer-events-none" />
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="input-field pl-10"
-                      placeholder={t('auth.passwordPlaceholder')}
-                      required
-                    />
-                  </div>
+                  <PasswordInput
+                    value={formData.password}
+                    onChange={handleChange}
+                    name="password"
+                    placeholder={t('auth.passwordPlaceholder')}
+                    className="pl-10"
+                    required
+                  />
                   {/* Password strength indicator */}
                   {formData.password && (
                     <div className="space-y-1">
@@ -618,18 +615,13 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-gray-700">
                     {t('auth.confirmPassword')} <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 dark:text-primary-400 z-10 pointer-events-none" />
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="input-field pl-10"
-                      placeholder="••••••••"
-                      required
-                    />
-                  </div>
+                  <PasswordInput
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    required
+                  />
                 </div>
               </div>
               <p className="text-xs text-gray-400 -mt-1">{t('auth.passwordHint')}</p>

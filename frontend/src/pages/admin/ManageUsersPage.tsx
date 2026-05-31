@@ -103,7 +103,13 @@ export default function ManageUsersPage() {
 
   const openEdit = (user: User) => {
     setEditingUser(user)
-    setEditForm({ firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone ?? '', role: user.role })
+    setEditForm({
+      firstName: (user.firstName ?? '').trim(),
+      lastName: (user.lastName ?? '').trim(),
+      email: (user.email ?? '').trim(),
+      phone: (user.phone ?? '').trim(),
+      role: user.role
+    })
     setOpenMenuId(null)
   }
 

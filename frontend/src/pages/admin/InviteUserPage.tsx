@@ -114,7 +114,7 @@ export default function InviteUserPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <FormField label={t('admin.invite.emailLabel')} required>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
                 <input
                   type="email"
                   value={email}

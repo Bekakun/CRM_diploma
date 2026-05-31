@@ -3,10 +3,10 @@ package kz.iitu.backend.user;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SecureRandom;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

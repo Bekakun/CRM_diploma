@@ -282,7 +282,7 @@ export default function RegisterPage() {
                     {t('auth.verificationCode')}
                   </label>
                   {/* OTP boxes */}
-                  <div className="flex justify-center gap-2.5">
+                  <div className="flex justify-center gap-1.5 sm:gap-2.5 w-full px-2">
                     {otpDigits.map((digit, idx) => (
                       <input
                         key={idx}
@@ -325,7 +325,7 @@ export default function RegisterPage() {
                           const nextFocus = Math.min(pasted.length, 5)
                           otpRefs.current[nextFocus]?.focus()
                         }}
-                        className="w-11 h-14 text-center text-2xl font-bold rounded-xl border-2
+                        className="flex-1 min-w-0 max-w-[48px] h-12 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border-2
                                    border-gray-200 bg-white text-gray-900
                                    focus:border-primary-500 focus:ring-2 focus:ring-primary-100
                                    outline-none transition-all duration-150

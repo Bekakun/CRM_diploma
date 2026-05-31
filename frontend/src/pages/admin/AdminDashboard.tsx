@@ -86,7 +86,7 @@ export default function AdminDashboard() {
     { label: t('admin.dashboard.activeAccounts'), value: data.activeUsersPercent, color: 'bg-emerald-500' },
   ] : []
 
-  const hour = new Date().getHours()
+  const hour = parseInt(new Intl.DateTimeFormat('ru-RU', { hour: 'numeric', hour12: false, timeZone: 'Asia/Almaty' }).format(new Date()), 10)
   const greeting = hour < 12 ? t('common.goodMorning') : hour < 18 ? t('common.goodAfternoon') : t('common.goodEvening')
 
   const openEdit = (user: RecentUser) => {
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-all duration-200 cursor-pointer"
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden shadow-sm shrink-0">
                       {user.profilePhotoUrl ? (
                         <img src={getFileUrl(user.profilePhotoUrl)} alt="" className="w-full h-full object-cover" />
@@ -211,14 +211,14 @@ export default function AdminDashboard() {
                         </span>
                       )}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
                     </div>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getRoleBadgeClass(user.role)}`}>
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium border shrink-0 ml-2 ${getRoleBadgeClass(user.role)}`}>
                     {t(`roles.${user.role}`)}
                   </span>
                 </div>

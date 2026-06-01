@@ -329,11 +329,11 @@ export default function SettingsPage({ showPasswordChange = true }: Props) {
 
             <FormField label={t('common.email')}>
               {emailStep === 'idle' && (
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-stretch">
                   <input type="email" value={user?.email ?? ''} className="input-field flex-1 opacity-60 cursor-not-allowed" disabled />
                   <button type="button" onClick={() => setEmailStep('input')}
-                    className="btn-secondary text-xs px-3 py-2 shrink-0">
-                    Сменить
+                    className="btn-secondary text-sm px-4 shrink-0 self-stretch">
+                    {t('settings.changeEmail') || 'Сменить'}
                   </button>
                 </div>
               )}

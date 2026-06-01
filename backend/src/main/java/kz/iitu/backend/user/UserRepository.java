@@ -18,6 +18,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmailHash(String emailHash);
 
+    // Проверить занят ли email другим пользователем (исключая текущего)
+    boolean existsByEmailHashAndIdNot(String emailHash, UUID excludeId);
+
     Optional<User> findByEmailVerificationToken(String token);
 
     Optional<User> findByPasswordResetToken(String token);

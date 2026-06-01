@@ -112,8 +112,8 @@ public class ProfileController {
         if (newEmail == null || !newEmail.contains("@")) {
             throw new BadRequestException("Некорректный email");
         }
-        // Check not already taken
-        if (userService.emailExists(newEmail) && !newEmail.equalsIgnoreCase(currentUser.getEmail())) {
+        // Check not already taken by ANOTHER user (safe: excludes current user by UUID)
+        if (userService.emailTakenByOther(newEmail, currentUser.getId())) {
             throw new ConflictException("Этот email уже используется");
         }
         EmailChangeService.PendingChange change = emailChangeService.createRequest(

@@ -75,6 +75,14 @@ export default function AdminPaymentsPage() {
   const [sortMenuOpen, setSortMenuOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
 
+  // Close sort dropdown on outside click
+  useEffect(() => {
+    if (!sortMenuOpen) return
+    const handler = () => setSortMenuOpen(false)
+    const timer = setTimeout(() => document.addEventListener('click', handler), 0)
+    return () => { clearTimeout(timer); document.removeEventListener('click', handler) }
+  }, [sortMenuOpen])
+
   const [markPaidModalOpen, setMarkPaidModalOpen] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<AdminPayment | null>(null)
   const [markPaidForm, setMarkPaidForm] = useState({ paidAt: '', note: '' })
@@ -381,10 +389,10 @@ export default function AdminPaymentsPage() {
             </div>
 
             {/* Course + Dates + Sort */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
 
-              {/* Курс — кастомный select с иконкой стрелки */}
-              <div className="relative sm:w-56 shrink-0">
+              {/* Курс — слева */}
+              <div className="relative sm:w-52 shrink-0">
                 <select
                   value={courseFilter}
                   onChange={e => { setCourseFilter(e.target.value); setCurrentPage(0) }}
@@ -396,56 +404,55 @@ export default function AdminPaymentsPage() {
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
 
-              {/* Даты + Sort */}
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                {/* Mobile: flex-1 (полная ширина, год виден) | Desktop: max-w-[145px] */}
+              {/* Даты — по центру на десктопе, стопкой на мобиле */}
+              <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2">
                 <input
                   type="date" value={dateFrom}
                   onChange={e => { setDateFrom(e.target.value); setCurrentPage(0) }}
-                  className="input-field flex-1 min-w-0 sm:max-w-[145px] [color-scheme:light] dark:[color-scheme:dark]"
+                  className="input-field w-full sm:w-[148px] [color-scheme:light] dark:[color-scheme:dark]"
                   title={t('admin.payments.dateFrom')}
                 />
-                <span className="text-gray-400 dark:text-gray-500 shrink-0 select-none">—</span>
+                <span className="hidden sm:block text-gray-400 dark:text-gray-500 select-none shrink-0">—</span>
                 <input
                   type="date" value={dateTo} min={dateFrom || undefined}
                   onChange={e => { setDateTo(e.target.value); setCurrentPage(0) }}
-                  className="input-field flex-1 min-w-0 sm:max-w-[145px] [color-scheme:light] dark:[color-scheme:dark]"
+                  className="input-field w-full sm:w-[148px] [color-scheme:light] dark:[color-scheme:dark]"
                   title={t('admin.payments.dateTo')}
                 />
+              </div>
 
-                {/* Sort — dropdown */}
-                <div className="relative shrink-0">
-                  <button
-                    onClick={() => setSortMenuOpen(v => !v)}
-                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium
-                               bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                               text-gray-600 dark:text-gray-300 hover:border-gray-300 transition-all whitespace-nowrap"
-                  >
-                    <ArrowUpDown className="w-4 h-4" />
-                    <span className="hidden sm:inline">
-                      {sortDir === 'asc' ? t('admin.payments.sortEarlyFirst') : t('admin.payments.sortLateFirst')}
-                    </span>
-                    <ChevronDown className={`sm:hidden w-3.5 h-3.5 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
+              {/* Sort — справа */}
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => setSortMenuOpen(v => !v)}
+                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium w-full sm:w-auto
+                             bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                             text-gray-600 dark:text-gray-300 hover:border-gray-300 transition-all whitespace-nowrap"
+                >
+                  <ArrowUpDown className="w-4 h-4 shrink-0" />
+                  <span className="flex-1 sm:flex-none text-left">
+                    {sortDir === 'asc' ? t('admin.payments.sortEarlyFirst') : t('admin.payments.sortLateFirst')}
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-                  {sortMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
-                      {(['asc', 'desc'] as const).map(dir => (
-                        <button
-                          key={dir}
-                          onClick={() => { setSortDir(dir); setCurrentPage(0); setSortMenuOpen(false) }}
-                          className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 transition-colors
-                            ${sortDir === dir
-                              ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 font-medium'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${sortDir === dir ? 'bg-primary-500' : 'bg-transparent'}`} />
-                          {dir === 'asc' ? t('admin.payments.sortEarlyFirst') : t('admin.payments.sortLateFirst')}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {sortMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 min-w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
+                    {(['asc', 'desc'] as const).map(dir => (
+                      <button
+                        key={dir}
+                        onClick={() => { setSortDir(dir); setCurrentPage(0); setSortMenuOpen(false) }}
+                        className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 transition-colors whitespace-nowrap
+                          ${sortDir === dir
+                            ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 font-medium'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${sortDir === dir ? 'bg-primary-500' : 'bg-transparent'}`} />
+                        {dir === 'asc' ? t('admin.payments.sortEarlyFirst') : t('admin.payments.sortLateFirst')}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

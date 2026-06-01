@@ -49,6 +49,13 @@ public class UserService {
         return userRepository.existsByEmailHash(hash);
     }
 
+    /** Возвращает true только если email занят ДРУГИМ пользователем (не excludeUserId) */
+    @Transactional
+    public boolean emailTakenByOther(String email, UUID excludeUserId) {
+        String hash = emailHashUtil.hash(email);
+        return userRepository.existsByEmailHashAndIdNot(hash, excludeUserId);
+    }
+
     public UserResponse updateUser(UUID userId, UpdateUserRequest request) {
         log.info("Updating user with ID: {}", userId);
 

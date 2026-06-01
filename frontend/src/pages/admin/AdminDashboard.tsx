@@ -127,7 +127,7 @@ export default function AdminDashboard() {
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px)', backgroundSize: '20px 20px' }}
         />
-        <div className="relative flex items-start justify-between gap-4">
+        <div className="relative flex items-center justify-between gap-4">
           {/* Text */}
           <div className="min-w-0 flex-1">
             <p className="text-violet-100/80 text-sm font-medium mb-1">{greeting}</p>
@@ -135,31 +135,11 @@ export default function AdminDashboard() {
               {user ? `${user.firstName} ${user.lastName}` : t('admin.dashboard.title')}
             </h1>
             <p className="text-violet-100/70 text-sm mt-1">{t('admin.dashboard.subtitle')}</p>
-
-            {/* Stats — только на десктопе sm+ */}
-            {data && (
-              <div className="hidden sm:flex items-center gap-4 mt-4 flex-wrap">
-                <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/20 min-w-[140px]">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Users className="w-3.5 h-3.5 text-violet-200" />
-                    <span className="text-xs text-violet-100/70 font-medium uppercase tracking-wide">{t('admin.dashboard.totalUsers')}</span>
-                  </div>
-                  <p className="text-3xl font-bold tabular-nums">{data.totalUsers}</p>
-                </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/20 min-w-[140px]">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <UserPlus className="w-3.5 h-3.5 text-violet-200" />
-                    <span className="text-xs text-violet-100/70 font-medium uppercase tracking-wide">{t('admin.dashboard.newThisMonth')}</span>
-                  </div>
-                  <p className="text-3xl font-bold tabular-nums">{data.newRegistrationsThisMonth}</p>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Shield — вверху справа на всех экранах */}
-          <div className="w-11 h-11 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shrink-0">
-            <Shield className="w-5 h-5 text-white" />
+          {/* Shield — по центру справа, крупный */}
+          <div className="w-16 h-16 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/25 shrink-0 shadow-lg">
+            <Shield className="w-8 h-8 text-white drop-shadow" />
           </div>
         </div>
       </div>

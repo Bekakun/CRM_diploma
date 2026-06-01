@@ -522,7 +522,7 @@ export default function ManageUsersPage() {
               <input type="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="input-field" placeholder="+7XXXXXXXXXX" />
             </FormField>
             <FormField label={t('common.role')}>
-              <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value as UserRole })} className="input-field">
+              <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value as UserRole })} className="input-field pr-8">
                 <option value="STUDENT">{t('roles.STUDENT')}</option>
                 <option value="INSTRUCTOR">{t('roles.INSTRUCTOR')}</option>
                 <option value="ADMIN">{t('roles.ADMIN')}</option>

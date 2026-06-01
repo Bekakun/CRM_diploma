@@ -143,6 +143,11 @@
     @apply bg-gray-50/60 dark:bg-gray-800/30 cursor-not-allowed opacity-60;
   }
 
+  /* Select: move native arrow away from edge */
+  select.input-field {
+    @apply pr-8;
+  }
+
   /* Hide Safari's native password reveal / autofill decoration buttons
      so custom eye-toggle is always visible on iOS */
   input::-webkit-credentials-auto-fill-button,
@@ -294,19 +299,16 @@
   }
 }
 
-/* ── Safari iOS: hide all native autofill decoration buttons ──
-   Must be outside @layer to override browser-level pseudo-elements */
+/* ── Safari iOS: hide native autofill overlay buttons ──
+   Must be outside @layer to override browser-level pseudo-elements.
+   Do NOT set height/width to 0 — it collapses the input field on iOS. */
 input::-webkit-credentials-auto-fill-button,
 input::-webkit-strong-password-auto-fill-button,
 input::-webkit-contact-auto-fill-button,
 input::-webkit-caps-lock-indicator,
-input::-webkit-password-auto-fill-button,
-input::-webkit-textfield-decoration-container {
+input::-webkit-password-auto-fill-button {
   visibility: hidden !important;
-  display: none !important;
   pointer-events: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  margin: 0 !important;
   opacity: 0 !important;
+  margin: 0 !important;
 }

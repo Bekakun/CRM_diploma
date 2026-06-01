@@ -145,7 +145,7 @@
 
   /* Select: move native arrow away from edge */
   select.input-field {
-    @apply pr-8;
+    padding-right: 2rem !important;
   }
 
   /* Hide Safari's native password reveal / autofill decoration buttons

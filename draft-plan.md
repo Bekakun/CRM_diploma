@@ -1,5 +1,5 @@
 
-### тема: "Development of a CRM Platform for Training with an Integrated AI Assistant"
+### Тема: "Development of a CRM Platform for Training with an Integrated AI Assistant"
 
 
 

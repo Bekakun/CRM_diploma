@@ -435,9 +435,9 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
     <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 sm:p-4">
       <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-4xl max-h-[94vh] sm:max-h-[90vh] flex flex-col">
 
-        {/* Sticky header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700
-                        px-4 sm:px-6 py-4 rounded-t-2xl sm:rounded-t-2xl z-10 shrink-0">
+        {/* Fixed header — shrink-0 keeps it outside the scroll container */}
+        <div className="shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700
+                        px-4 sm:px-6 py-4 rounded-t-2xl sm:rounded-t-2xl z-10">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">

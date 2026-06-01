@@ -208,17 +208,17 @@ export default function InstructorAnalyticsPage() {
         </div>
 
         {/* Course selector */}
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <button
             onClick={() => setDropdownOpen((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 w-full sm:w-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors shadow-sm"
           >
-            <BookOpen className="w-4 h-4 text-gray-400" />
-            <span>{selectedCourse?.title ?? '—'}</span>
-            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <BookOpen className="w-4 h-4 text-gray-400 shrink-0" />
+            <span className="flex-1 text-left truncate">{selectedCourse?.title ?? '—'}</span>
+            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-1.5 w-56 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-lg z-20 overflow-hidden animate-[fadeSlideDown_0.15s_ease_both]">
+            <div className="absolute left-0 sm:left-auto sm:right-0 mt-1.5 w-full sm:w-56 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-lg z-20 overflow-hidden animate-[fadeSlideDown_0.15s_ease_both]">
               {courses.map((c) => (
                 <button
                   key={c.id}
@@ -244,7 +244,7 @@ export default function InstructorAnalyticsPage() {
       ) : (
         <>
           {/* Stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <AnimatedStatCard
               label={t('instructor.analytics.avgGrade')}
               value={stats.avgGrade != null ? `${stats.avgGrade}` : '—'}

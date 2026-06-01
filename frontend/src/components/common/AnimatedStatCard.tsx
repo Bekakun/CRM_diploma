@@ -63,39 +63,40 @@ export default function AnimatedStatCard({ label, value, icon: Icon, bg, delay =
       {/* Ambient glow at top-right */}
       <div className={`absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br ${gradient} opacity-[0.12] rounded-full blur-2xl`} />
 
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide truncate">
+      {/* Mobile: horizontal row | Desktop: vertical stack */}
+      <div className="relative flex sm:block items-center gap-4">
+
+        {/* Icon — left on mobile, top-right on desktop */}
+        <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center shrink-0
+                         shadow-[0_4px_12px_rgba(0,0,0,0.15)]
+                         sm:absolute sm:top-0 sm:right-0
+                         group-hover:scale-110 group-hover:shadow-[0_6px_18px_rgba(0,0,0,0.2)]
+                         transition-all duration-300`}>
+          <Icon className="w-5 h-5 text-white drop-shadow-sm" />
+        </div>
+
+        {/* Text */}
+        <div className="flex-1 min-w-0 sm:pr-16">
+          <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide leading-tight">
             {label}
           </p>
-          <p className="mt-2 text-[30px] font-bold tabular-nums leading-none
+          <p className="mt-1 sm:mt-2 text-2xl sm:text-[30px] font-bold tabular-nums leading-none
                         bg-gradient-to-br from-gray-900 to-gray-600
                         dark:from-gray-50 dark:to-gray-300
                         bg-clip-text text-transparent">
             {displayValue}
           </p>
           {trend !== undefined && (
-            <div className={`mt-2 inline-flex items-center gap-1 text-xs font-semibold
+            <div className={`mt-1.5 inline-flex items-center gap-1 text-xs font-semibold
                              px-2 py-0.5 rounded-full
                              ${trend >= 0
                                ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30'
                                : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
                              }`}>
-              {trend >= 0
-                ? <TrendingUp className="w-3 h-3" />
-                : <TrendingDown className="w-3 h-3" />
-              }
+              {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
               {Math.abs(trend)}%
             </div>
           )}
-        </div>
-
-        {/* Gradient icon box */}
-        <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center shrink-0
-                         shadow-[0_4px_12px_rgba(0,0,0,0.15)]
-                         group-hover:scale-110 group-hover:shadow-[0_6px_18px_rgba(0,0,0,0.2)]
-                         transition-all duration-300`}>
-          <Icon className="w-5 h-5 text-white drop-shadow-sm" />
         </div>
       </div>
 

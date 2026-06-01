@@ -75,7 +75,10 @@ export default function AIAssistantPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  const closeSidebarMobile = () => { if (window.innerWidth < 768) setSidebarOpen(false) }
+
   const openSession = async (sessionId: string) => {
+    closeSidebarMobile()
     try {
       const res = await api.get<{ messages: { id: string; role: string; content: string; createdAt: string }[] }>(
         `/student/ai/sessions/${sessionId}`
@@ -98,6 +101,7 @@ export default function AIAssistantPage() {
 
   const newChat = async () => {
     if (!selectedEnrollmentId) return
+    closeSidebarMobile()
     try {
       const res = await api.post<Session>(`/student/ai/sessions?enrollmentId=${selectedEnrollmentId}`)
       const session = res.data
@@ -193,24 +197,23 @@ export default function AIAssistantPage() {
   const showQuickQuestions = messages.length <= 1 && !isLoading
 
   return (
-    <div className="h-[calc(100vh-7rem)] flex gap-4">
+    <div className="h-[calc(100vh-7rem)] flex gap-4 relative overflow-hidden">
 
-      {/* ── Sidebar overlay backdrop (mobile only) ── */}
+      {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          className="md:hidden absolute inset-0 bg-black/50 z-40"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* ── Sidebar: history ── */}
+      {/* Sidebar — overlay on mobile, inline on desktop */}
       <aside className={`
-        flex flex-col shrink-0 transition-all duration-300
-        md:relative md:z-auto
-        fixed inset-y-0 left-0 z-40 md:inset-auto
-        ${sidebarOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full md:w-0 md:overflow-hidden md:translate-x-0'}
+        absolute md:relative top-0 left-0 h-full z-50 md:z-auto
+        flex flex-col shrink-0 transition-all duration-300 ease-in-out
+        ${sidebarOpen ? 'w-72 translate-x-0' : 'w-72 -translate-x-full md:w-0 md:overflow-hidden md:translate-x-0'}
       `}>
-        <div className="card flex flex-col h-full p-3 gap-2 w-64 md:min-w-[256px] overflow-y-auto mt-0 md:mt-0 pt-safe">
+        <div className="card flex flex-col h-full p-3 gap-2 min-w-[256px] rounded-none md:rounded-2xl shadow-2xl md:shadow-none overflow-y-auto">
           {/* New chat button */}
           <button
             onClick={newChat}

@@ -24,8 +24,18 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         show_sql: false
+        default_batch_fetch_size: 20   # batch fetch reduces N+1 queries
+        order_inserts: true
+        order_updates: true
+        jdbc.batch_size: 20
     show-sql: false
     open-in-view: false
+
+  # Spring Cache (Caffeine in-memory)
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=60s
 
   # Flyway конфигурация
   flyway:
@@ -110,3 +120,7 @@ encryption:
 # Server
 server:
   port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+    min-response-size: 1024

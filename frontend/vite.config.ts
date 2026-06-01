@@ -28,5 +28,21 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    build: {
+      // Split vendor libraries into separate cached chunks
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+            'vendor-ui':     ['lucide-react', 'framer-motion'],
+            'vendor-i18n':   ['react-i18next', 'i18next'],
+            'vendor-chart':  ['recharts'],
+            'vendor-misc':   ['axios', 'zustand', 'date-fns'],
+          },
+        },
+      },
+      // Increase chunk warning threshold
+      chunkSizeWarningLimit: 600,
+    },
   }
 })

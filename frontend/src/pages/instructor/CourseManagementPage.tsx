@@ -11,16 +11,12 @@ interface Lesson {
   onlineMeetingUrl?: string; recordingUrl?: string; status: string
   hasHomework: boolean; attendanceCount?: number; totalStudents?: number
 }
-
 interface Course {
   id: string; name: string; description: string
   startDate: string; endDate: string; totalLessons: number; enrolledStudents: number
 }
 
 const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-
-const toDateStr = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 
 const STATUS_COLORS: Record<string, string> = {
   SCHEDULED:   'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 text-primary-800 dark:text-primary-200',
@@ -32,14 +28,18 @@ const STATUS_LABELS: Record<string, string> = {
   SCHEDULED: 'Запланировано', IN_PROGRESS: 'Идёт', COMPLETED: 'Завершено', CANCELLED: 'Отменено',
 }
 
+const toDateStr = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+
 export default function CourseManagementPage() {
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
-  const [currentDate, setCurrentDate] = useState(new Date())
+  const [currentDate, setCurrentDate]   = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
-  const [course, setCourse] = useState<Course | null>(null)
+  const [createForDate, setCreateForDate]     = useState<string | null>(null)
+  const [selectedLesson, setSelectedLesson]   = useState<Lesson | null>(null)
+  const [course, setCourse]   = useState<Course | null>(null)
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [otherLessons, setOtherLessons] = useState<Lesson[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,7 +56,6 @@ export default function CourseManagementPage() {
         ])
         setCourse(courseRes.data)
         setLessons(lessonsRes.data.content ?? lessonsRes.data)
-
         const otherCourses = (allCoursesRes.data.content ?? allCoursesRes.data)
           .filter((c: { id: string }) => c.id !== courseId)
         const otherResults = await Promise.all(
@@ -76,7 +75,7 @@ export default function CourseManagementPage() {
     const s = toDateStr(date)
     return lessons.filter(l => l.scheduledAt.slice(0, 10) === s)
   }
-  const getOtherLessonsFor = (date: Date) => {
+  const getOtherFor = (date: Date) => {
     const s = toDateStr(date)
     return otherLessons.filter(l => l.scheduledAt.slice(0, 10) === s)
   }
@@ -99,18 +98,19 @@ export default function CourseManagementPage() {
   }
 
   const changeMonth = (delta: number) => {
-    const d = new Date(currentDate)
-    d.setMonth(d.getMonth() + delta)
-    setCurrentDate(d)
+    const d = new Date(currentDate); d.setMonth(d.getMonth() + delta); setCurrentDate(d)
   }
 
-  const todayStr = toDateStr(new Date())
+  const openCreate = (date: Date) => {
+    setCreateForDate(toDateStr(date))
+    setShowCreateModal(true)
+  }
+
+  const todayStr    = toDateStr(new Date())
   const selectedStr = toDateStr(selectedDate)
   const days = getDays(currentDate)
-  const selectedMyLessons = getLessonsFor(selectedDate)
-    .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))
-  const selectedOtherLessons = getOtherLessonsFor(selectedDate)
-    .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))
+  const selectedMyLessons    = getLessonsFor(selectedDate).sort((a,b) => a.scheduledAt.localeCompare(b.scheduledAt))
+  const selectedOtherLessons = getOtherFor(selectedDate).sort((a,b) => a.scheduledAt.localeCompare(b.scheduledAt))
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -120,18 +120,14 @@ export default function CourseManagementPage() {
 
   return (
     <div className="space-y-4 pb-10">
-      {/* Page header */}
+      {/* Header */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate('/instructor/courses')}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors shrink-0"
-        >
+        <button onClick={() => navigate('/instructor/courses')}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors shrink-0">
           <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
         </button>
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">
-            {course?.name}
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">{course?.name}</h1>
           {course?.description && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">{course.description}</p>
           )}
@@ -140,13 +136,13 @@ export default function CourseManagementPage() {
 
       <div className="card p-4 sm:p-6">
         {/* Month nav */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 capitalize">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 capitalize">
             {currentDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
           </h2>
           <div className="flex items-center gap-1">
             <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-              <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => { setCurrentDate(new Date()); setSelectedDate(new Date()) }}
@@ -155,179 +151,191 @@ export default function CourseManagementPage() {
               Сегодня
             </button>
             <button onClick={() => changeMonth(1)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-              <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 mb-1">
-          {WEEK_DAYS.map(d => (
-            <div key={d} className={`text-center text-xs font-semibold py-1.5
-              ${d === 'Вс' ? 'text-red-400 dark:text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
-              {d}
-            </div>
-          ))}
-        </div>
-
-        {/* Compact day grid */}
-        <div className="grid grid-cols-7 gap-y-1">
-          {days.map((day, i) => {
-            if (!day) return <div key={`e-${i}`} />
-            const str = toDateStr(day)
-            const isToday = str === todayStr
-            const isSelected = str === selectedStr
-            const myLessons = getLessonsFor(day)
-            const otherConflicts = getOtherLessonsFor(day)
-            const isSun = day.getDay() === 0
-
-            return (
-              <button
-                key={str}
-                onClick={() => setSelectedDate(day)}
-                className="flex flex-col items-center py-1 rounded-xl transition-all active:scale-95"
-              >
-                <span className={`
-                  w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full
-                  text-sm sm:text-base font-medium transition-colors
-                  ${isSelected && isToday  ? 'bg-primary-600 text-white'
-                  : isSelected             ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                  : isToday                ? 'border-2 border-primary-500 text-primary-600 dark:text-primary-400 font-bold'
-                  : isSun                  ? 'text-red-400 dark:text-red-500'
-                  :                          'text-gray-700 dark:text-gray-300'}
-                `}>
-                  {day.getDate()}
-                </span>
-                {/* Dots: blue = my lessons, red = conflicts */}
-                <div className="flex gap-0.5 h-1.5 mt-0.5">
-                  {myLessons.slice(0, 2).map((_, di) => (
-                    <span key={`m-${di}`} className={`w-1 h-1 rounded-full ${isSelected ? 'bg-primary-300' : 'bg-primary-500 dark:bg-primary-400'}`} />
-                  ))}
-                  {otherConflicts.slice(0, 1).map((_, di) => (
-                    <span key={`o-${di}`} className={`w-1 h-1 rounded-full ${isSelected ? 'bg-red-300' : 'bg-red-500 dark:bg-red-400'}`} />
-                  ))}
-                </div>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Legend */}
-        <div className="mt-3 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-primary-500" /> Занятия курса
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-red-500" /> Конфликт
-          </span>
-        </div>
-
-        {/* Divider */}
-        <div className="mt-4 border-t border-gray-100 dark:border-gray-700/50" />
-
-        {/* Selected day */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              {selectedDate.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}
-              {selectedMyLessons.length > 0 && (
-                <span className="ml-2 text-xs text-gray-400 font-normal">
-                  {selectedMyLessons.length} {selectedMyLessons.length === 1 ? 'занятие' : selectedMyLessons.length < 5 ? 'занятия' : 'занятий'}
-                </span>
-              )}
-            </h3>
-            {/* Create lesson button */}
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700
-                         text-white text-xs font-semibold rounded-xl transition-colors active:scale-95"
-            >
-              <Plus className="w-3.5 h-3.5" /> Добавить
-            </button>
-          </div>
-
-          {/* My lessons */}
-          {selectedMyLessons.length === 0 && selectedOtherLessons.length === 0 ? (
-            <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-5">
-              Нет занятий — нажмите «Добавить» чтобы создать
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {selectedMyLessons.map(lesson => {
-                const time = new Date(lesson.scheduledAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' })
-                const colorCls = STATUS_COLORS[lesson.status] ?? STATUS_COLORS.SCHEDULED
-                return (
-                  <button
-                    key={lesson.id}
-                    onClick={() => setSelectedLesson(lesson)}
-                    className={`w-full text-left p-3 rounded-xl border hover:brightness-95 active:scale-[0.98] transition-all ${colorCls}`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm leading-snug">{lesson.title}</p>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs opacity-75">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 shrink-0" />
-                            {time}{lesson.durationMinutes ? ` · ${lesson.durationMinutes} мин` : ''}
-                          </span>
-                          {lesson.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3 shrink-0" /> {lesson.location}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <span className="shrink-0 text-[10px] font-medium opacity-70 mt-0.5">
-                        {STATUS_LABELS[lesson.status] ?? lesson.status}
-                      </span>
-                    </div>
-                  </button>
-                )
-              })}
-
-              {/* Conflict lessons from other courses */}
-              {selectedOtherLessons.map(lesson => {
-                const time = new Date(lesson.scheduledAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' })
-                return (
-                  <div
-                    key={lesson.id}
-                    className="p-3 rounded-xl border bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300"
-                    title={`${time} — ${lesson.title} (${lesson.courseName})`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                      <p className="text-xs font-medium truncate flex-1">
-                        {time} · {lesson.courseName}
-                      </p>
-                      <span className="text-[10px] opacity-60 shrink-0">конфликт</span>
-                    </div>
+        {/* ── DESKTOP: large cells (md+) ── */}
+        <div className="hidden md:block overflow-x-auto">
+          <div className="grid grid-cols-7 gap-1 min-w-[560px]">
+            {WEEK_DAYS.map(d => (
+              <div key={d} className={`text-center text-xs font-semibold py-2
+                ${d === 'Вс' ? 'text-red-400 dark:text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
+                {d}
+              </div>
+            ))}
+            {days.map((day, i) => {
+              if (!day) return (
+                <div key={`e-${i}`} className="border border-gray-100 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-800/50" />
+              )
+              const dayLessons  = getLessonsFor(day)
+              const otherConf   = getOtherFor(day)
+              const isToday     = toDateStr(day) === todayStr
+              return (
+                <div
+                  key={toDateStr(day)}
+                  onClick={() => openCreate(day)}
+                  className={`border-2 rounded-lg p-2 min-h-[110px] cursor-pointer transition-all hover:border-primary-400 dark:hover:border-primary-500 ${
+                    isToday
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+                  }`}
+                >
+                  <div className={`text-sm font-semibold mb-1.5 ${
+                    isToday ? 'text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {day.getDate()}
                   </div>
-                )
-              })}
+                  <div className="space-y-1">
+                    {dayLessons.map(lesson => (
+                      <div key={lesson.id}
+                        onClick={e => { e.stopPropagation(); setSelectedLesson(lesson) }}
+                        className="text-xs p-1 rounded truncate cursor-pointer bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60"
+                        title={`${lesson.scheduledAt.slice(11,16)} — ${lesson.title}`}
+                      >
+                        {lesson.scheduledAt.slice(11,16)} — {lesson.title}
+                      </div>
+                    ))}
+                    {otherConf.map(lesson => (
+                      <div key={lesson.id}
+                        className="text-xs p-1 rounded truncate cursor-default bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
+                        title={`${lesson.scheduledAt.slice(11,16)} — ${lesson.title} (${lesson.courseName})`}
+                      >
+                        {lesson.scheduledAt.slice(11,16)} — {lesson.courseName}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          {/* Desktop legend */}
+          <div className="mt-4 flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 rounded" />
+              <span className="text-gray-600 dark:text-gray-400">Занятия этого курса</span>
             </div>
-          )}
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 rounded" />
+              <span className="text-gray-600 dark:text-gray-400">Занятия других курсов (конфликт)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── MOBILE: compact iPhone-style (< md) ── */}
+        <div className="md:hidden">
+          <div className="grid grid-cols-7 mb-1">
+            {WEEK_DAYS.map(d => (
+              <div key={d} className={`text-center text-xs font-semibold py-1.5
+                ${d === 'Вс' ? 'text-red-400 dark:text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                {d}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-y-1">
+            {days.map((day, i) => {
+              if (!day) return <div key={`e-${i}`} />
+              const str = toDateStr(day)
+              const isToday    = str === todayStr
+              const isSelected = str === selectedStr
+              const myL  = getLessonsFor(day)
+              const othL = getOtherFor(day)
+              const isSun = day.getDay() === 0
+              return (
+                <button key={str} onClick={() => setSelectedDate(day)}
+                  className="flex flex-col items-center py-1 rounded-xl transition-all active:scale-95">
+                  <span className={`
+                    w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors
+                    ${isSelected && isToday  ? 'bg-primary-600 text-white'
+                    : isSelected             ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                    : isToday                ? 'border-2 border-primary-500 text-primary-600 dark:text-primary-400 font-bold'
+                    : isSun                  ? 'text-red-400 dark:text-red-500'
+                    :                          'text-gray-700 dark:text-gray-300'}
+                  `}>
+                    {day.getDate()}
+                  </span>
+                  <div className="flex gap-0.5 h-1.5 mt-0.5">
+                    {myL.slice(0,2).map((_,di) => <span key={`m${di}`} className={`w-1 h-1 rounded-full ${isSelected?'bg-primary-300':'bg-primary-500'}`} />)}
+                    {othL.slice(0,1).map((_,di) => <span key={`o${di}`} className={`w-1 h-1 rounded-full ${isSelected?'bg-red-300':'bg-red-500'}`} />)}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Mobile legend */}
+          <div className="mt-3 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary-500" /> Занятия курса</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Конфликт</span>
+          </div>
+
+          {/* Selected day */}
+          <div className="mt-4 border-t border-gray-100 dark:border-gray-700/50 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                {selectedDate.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}
+                {selectedMyLessons.length > 0 && (
+                  <span className="ml-2 text-xs text-gray-400 font-normal">{selectedMyLessons.length} зан.</span>
+                )}
+              </h3>
+              <button onClick={() => openCreate(selectedDate)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-xl transition-colors">
+                <Plus className="w-3.5 h-3.5" /> Добавить
+              </button>
+            </div>
+            {selectedMyLessons.length === 0 && selectedOtherLessons.length === 0 ? (
+              <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-5">Нет занятий</p>
+            ) : (
+              <div className="space-y-2">
+                {selectedMyLessons.map(lesson => {
+                  const time = new Date(lesson.scheduledAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' })
+                  const cls = STATUS_COLORS[lesson.status] ?? STATUS_COLORS.SCHEDULED
+                  return (
+                    <button key={lesson.id} onClick={() => setSelectedLesson(lesson)}
+                      className={`w-full text-left p-3 rounded-xl border hover:brightness-95 active:scale-[0.98] transition-all ${cls}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-sm">{lesson.title}</p>
+                          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs opacity-75">
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{time}</span>
+                            {lesson.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{lesson.location}</span>}
+                          </div>
+                        </div>
+                        <span className="text-[10px] opacity-70 shrink-0">{STATUS_LABELS[lesson.status] ?? lesson.status}</span>
+                      </div>
+                    </button>
+                  )
+                })}
+                {selectedOtherLessons.map(lesson => {
+                  const time = new Date(lesson.scheduledAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' })
+                  return (
+                    <div key={lesson.id}
+                      className="p-3 rounded-xl border bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                        <p className="text-xs font-medium truncate flex-1">{time} · {lesson.courseName}</p>
+                        <span className="text-[10px] opacity-60 shrink-0">конфликт</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {showCreateModal && course && (
+      {showCreateModal && course && createForDate && (
         <CreateLessonModal
-          courseId={courseId!}
-          courseName={course.name}
-          selectedDate={toDateStr(selectedDate)}
-          onClose={() => setShowCreateModal(false)}
-          onSave={(lesson: Lesson) => {
-            setLessons(prev => [...prev, lesson])
-            setShowCreateModal(false)
-          }}
+          courseId={courseId!} courseName={course.name} selectedDate={createForDate}
+          onClose={() => { setShowCreateModal(false); setCreateForDate(null) }}
+          onSave={(lesson: Lesson) => { setLessons(prev => [...prev, lesson]); setShowCreateModal(false); setCreateForDate(null) }}
         />
       )}
 
       {selectedLesson && (
-        <LessonDetailModal
-          lesson={selectedLesson}
-          onClose={() => setSelectedLesson(null)}
-          onSave={handleLessonSaved}
-        />
+        <LessonDetailModal lesson={selectedLesson} onClose={() => setSelectedLesson(null)} onSave={handleLessonSaved} />
       )}
     </div>
   )

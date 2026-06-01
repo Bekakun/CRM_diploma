@@ -251,7 +251,7 @@ export default function AIAssistantPage() {
                 <button
                   onClick={(e) => deleteSession(s.id, e)}
                   disabled={deletingSessionId === s.id}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-red-500 transition-all shrink-0"
+                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-0.5 rounded hover:text-red-500 transition-all shrink-0"
                 >
                   {deletingSessionId === s.id
                     ? <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />

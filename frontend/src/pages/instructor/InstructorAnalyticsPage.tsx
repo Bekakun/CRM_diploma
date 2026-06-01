@@ -142,6 +142,14 @@ export default function InstructorAnalyticsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return
+    const handler = () => setDropdownOpen(false)
+    const timer = setTimeout(() => document.addEventListener('click', handler), 0)
+    return () => { clearTimeout(timer); document.removeEventListener('click', handler) }
+  }, [dropdownOpen])
+
   const openLessonById = async (lessonId: string) => {
     if (!lessonId) return
     try {

@@ -263,6 +263,7 @@ export default function Header({ onMenuClick }: Props) {
           <div className="relative">
             <button
               onClick={handleOpenNotifications}
+              onMouseDown={(e) => e.stopPropagation()}
               title={t('common.notifications')}
               className={`relative p-2 rounded-xl transition-all duration-200 ${
                 showNotifications

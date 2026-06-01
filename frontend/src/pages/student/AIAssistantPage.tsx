@@ -40,6 +40,7 @@ export default function AIAssistantPage() {
   const [sidebarOpen, setSidebarOpen]               = useState(() => window.innerWidth >= 768)
   const [hoveredMsgId, setHoveredMsgId]             = useState<string | null>(null)
   const [deletingSessionId, setDeletingSessionId]   = useState<string | null>(null)
+  const [confirmDeleteSession, setConfirmDeleteSession] = useState<{ id: string; title: string } | null>(null)
 
   const { phrase: loadingPhrase, visible: phraseVisible } = useTypingPhrase(isLoading)
 
@@ -116,6 +117,14 @@ export default function AIAssistantPage() {
 
   const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation()
+    const session = sessions.find(s => s.id === sessionId)
+    setConfirmDeleteSession({ id: sessionId, title: session?.title ?? 'этот чат' })
+  }
+
+  const confirmDelete = async () => {
+    if (!confirmDeleteSession) return
+    const sessionId = confirmDeleteSession.id
+    setConfirmDeleteSession(null)
     setDeletingSessionId(sessionId)
     try {
       await api.delete(`/student/ai/sessions/${sessionId}`)
@@ -476,5 +485,37 @@ export default function AIAssistantPage() {
 
       </div>
     </div>
+
+      {/* Confirm delete modal */}
+      {confirmDeleteSession && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-100 dark:border-gray-700 animate-[fadeSlideUp_0.2s_ease_both]">
+            <div className="flex items-center justify-between px-5 pt-5 pb-4">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Удалить чат?</h3>
+              <button onClick={() => setConfirmDeleteSession(null)}
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-400 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="mx-5 mb-4 flex items-start gap-3 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+              <Trash2 className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 dark:text-red-300">
+                Вы уверены, что хотите удалить <b>«{confirmDeleteSession.title}»</b>? Все сообщения будут удалены.
+              </p>
+            </div>
+            <p className="px-5 pb-4 text-xs text-gray-400 dark:text-gray-500">Это действие необратимо.</p>
+            <div className="flex gap-3 px-5 pb-5">
+              <button onClick={() => setConfirmDeleteSession(null)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Отмена
+              </button>
+              <button onClick={confirmDelete} disabled={!!deletingSessionId}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {deletingSessionId ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Удалить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
   )
 }

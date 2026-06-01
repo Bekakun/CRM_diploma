@@ -370,7 +370,7 @@ export default function AdminPaymentsPage() {
           <div className="px-4 pt-4 pb-3 sm:px-6 sm:pt-5 space-y-2.5">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-300 pointer-events-none" />
               <input
                 type="text" value={studentSearch}
                 onChange={e => { setStudentSearch(e.target.value); setCurrentPage(0) }}
@@ -379,27 +379,32 @@ export default function AdminPaymentsPage() {
               />
             </div>
 
-            {/* Course */}
-            <select value={courseFilter} onChange={e => { setCourseFilter(e.target.value); setCurrentPage(0) }} className="input-field">
-              <option value="">{t('admin.payments.allCourses')}</option>
-              {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            {/* Course + Dates — одна строка на десктопе */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <select
+                value={courseFilter}
+                onChange={e => { setCourseFilter(e.target.value); setCurrentPage(0) }}
+                className="input-field pl-3.5 pr-8 sm:w-48 shrink-0"
+              >
+                <option value="">{t('admin.payments.allCourses')}</option>
+                {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
 
-            {/* Dates */}
-            <div className="flex items-center gap-2">
-              <input
-                type="date" value={dateFrom}
-                onChange={e => { setDateFrom(e.target.value); setCurrentPage(0) }}
-                className="input-field flex-1 [color-scheme:light] dark:[color-scheme:dark]"
-                title={t('admin.payments.dateFrom')}
-              />
-              <span className="text-gray-400 shrink-0">—</span>
-              <input
-                type="date" value={dateTo} min={dateFrom || undefined}
-                onChange={e => { setDateTo(e.target.value); setCurrentPage(0) }}
-                className="input-field flex-1 [color-scheme:light] dark:[color-scheme:dark]"
-                title={t('admin.payments.dateTo')}
-              />
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <input
+                  type="date" value={dateFrom}
+                  onChange={e => { setDateFrom(e.target.value); setCurrentPage(0) }}
+                  className="input-field flex-1 min-w-0 w-0 [color-scheme:light] dark:[color-scheme:dark]"
+                  title={t('admin.payments.dateFrom')}
+                />
+                <span className="text-gray-400 dark:text-gray-500 shrink-0 select-none">—</span>
+                <input
+                  type="date" value={dateTo} min={dateFrom || undefined}
+                  onChange={e => { setDateTo(e.target.value); setCurrentPage(0) }}
+                  className="input-field flex-1 min-w-0 w-0 [color-scheme:light] dark:[color-scheme:dark]"
+                  title={t('admin.payments.dateTo')}
+                />
+              </div>
             </div>
 
             {/* Sort + Reset */}

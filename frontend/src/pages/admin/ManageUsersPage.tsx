@@ -73,6 +73,14 @@ export default function ManageUsersPage() {
 
   useEffect(() => { loadUsers() }, [page])
 
+  // Close menu on outside click
+  useEffect(() => {
+    if (!openMenuId) return
+    const handler = () => setOpenMenuId(null)
+    const timer = setTimeout(() => document.addEventListener('click', handler), 0)
+    return () => { clearTimeout(timer); document.removeEventListener('click', handler) }
+  }, [openMenuId])
+
   const loadUsers = async () => {
     setIsLoading(true)
     try {

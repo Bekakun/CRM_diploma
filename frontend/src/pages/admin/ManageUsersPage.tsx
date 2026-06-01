@@ -204,7 +204,7 @@ export default function ManageUsersPage() {
         <div className="card animate-[fadeSlideUp_0.4s_0.1s_ease_both] opacity-0 [animation-fill-mode:forwards]">
           <div className="flex flex-col sm:flex-row gap-3 mb-5">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-400 z-10 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}

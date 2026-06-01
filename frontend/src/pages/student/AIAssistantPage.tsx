@@ -206,6 +206,7 @@ export default function AIAssistantPage() {
   const showQuickQuestions = messages.length <= 1 && !isLoading
 
   return (
+    <>
     <div className="h-[calc(100vh-7rem)] flex gap-4 relative overflow-hidden">
 
       {/* Mobile backdrop */}
@@ -486,7 +487,7 @@ export default function AIAssistantPage() {
       </div>
     </div>
 
-      {/* Confirm delete modal */}
+    {/* Confirm delete modal */}
       {confirmDeleteSession && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-100 dark:border-gray-700 animate-[fadeSlideUp_0.2s_ease_both]">
@@ -517,5 +518,6 @@ export default function AIAssistantPage() {
           </div>
         </div>
       )}
+    </>
   )
 }

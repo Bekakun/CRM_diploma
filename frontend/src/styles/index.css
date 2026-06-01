@@ -293,3 +293,20 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
   }
 }
+
+/* ── Safari iOS: hide all native autofill decoration buttons ──
+   Must be outside @layer to override browser-level pseudo-elements */
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-strong-password-auto-fill-button,
+input::-webkit-contact-auto-fill-button,
+input::-webkit-caps-lock-indicator,
+input::-webkit-password-auto-fill-button,
+input::-webkit-textfield-decoration-container {
+  visibility: hidden !important;
+  display: none !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+}

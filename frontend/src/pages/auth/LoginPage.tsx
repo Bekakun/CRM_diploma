@@ -405,7 +405,7 @@ export default function LoginPage() {
                   {t('common.email')}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 dark:text-primary-400 z-10 pointer-events-none" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-500 dark:text-primary-400 z-10 pointer-events-none" />
                   <input
                     type="email"
                     value={email}
@@ -430,7 +430,7 @@ export default function LoginPage() {
                   </Link>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-500 dark:text-primary-400 z-10 pointer-events-none" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}

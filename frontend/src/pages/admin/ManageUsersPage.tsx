@@ -213,7 +213,7 @@ export default function ManageUsersPage() {
                 className="input-field pl-9"
               />
             </div>
-            <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="input-field sm:w-48">
+            <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="input-field sm:w-48 pr-8">
               <option value="all">{t('admin.users.allRoles')}</option>
               <option value="SUPER_ADMIN">{t('admin.users.filterSuperAdmins')}</option>
               <option value="ADMIN">{t('admin.users.filterAdmins')}</option>

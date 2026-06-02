@@ -1,59 +1,48 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import { useEffect, lazy, Suspense } from 'react'
+import { useEffect } from 'react'
 import { useAuthStore, proactiveRefresh } from './context/authStore'
 import SessionExpiredModal from './components/common/SessionExpiredModal'
 import api from './services/api'
 
-// Layout components (loaded eagerly — needed immediately)
+// Layout components
 import MainLayout from './components/layout/MainLayout'
 import AuthLayout from './components/layout/AuthLayout'
 
-// Auth pages (loaded eagerly — first thing user sees)
+// Auth pages
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 
-// ── Lazy-loaded pages (each becomes a separate JS chunk) ──
-
 // Admin pages
-const AdminDashboard          = lazy(() => import('./pages/admin/AdminDashboard'))
-const InviteUserPage          = lazy(() => import('./pages/admin/InviteUserPage'))
-const ManageUsersPage         = lazy(() => import('./pages/admin/ManageUsersPage'))
-const AdminPaymentsPage       = lazy(() => import('./pages/admin/AdminPaymentsPage'))
-const AdminSettingsPage       = lazy(() => import('./pages/admin/AdminSettingsPage'))
+import AdminDashboard from './pages/admin/AdminDashboard'
+import InviteUserPage from './pages/admin/InviteUserPage'
+import ManageUsersPage from './pages/admin/ManageUsersPage'
+import AdminPaymentsPage from './pages/admin/AdminPaymentsPage'
+import AdminSettingsPage from './pages/admin/AdminSettingsPage'
 
 // Instructor pages
-const InstructorDashboard     = lazy(() => import('./pages/instructor/InstructorDashboard'))
-const CoursesPage             = lazy(() => import('./pages/instructor/CoursesPage'))
-const CourseManagementPage    = lazy(() => import('./pages/instructor/CourseManagementPage'))
-const StudentsPage            = lazy(() => import('./pages/instructor/StudentsPage'))
-const StudentDetailPage       = lazy(() => import('./pages/instructor/StudentDetailPage'))
-const InstructorCalendarPage  = lazy(() => import('./pages/instructor/InstructorCalendarPage'))
-const InstructorSettingsPage  = lazy(() => import('./pages/instructor/InstructorSettingsPage'))
-const InstructorAIAssistantPage = lazy(() => import('./pages/instructor/InstructorAIAssistantPage'))
-const InstructorAnalyticsPage = lazy(() => import('./pages/instructor/InstructorAnalyticsPage'))
+import InstructorDashboard from './pages/instructor/InstructorDashboard'
+import CoursesPage from './pages/instructor/CoursesPage'
+import CourseManagementPage from './pages/instructor/CourseManagementPage'
+import StudentsPage from './pages/instructor/StudentsPage'
+import StudentDetailPage from './pages/instructor/StudentDetailPage'
+import InstructorCalendarPage from './pages/instructor/InstructorCalendarPage'
+import InstructorSettingsPage from './pages/instructor/InstructorSettingsPage'
+import InstructorAIAssistantPage from './pages/instructor/InstructorAIAssistantPage'
+import InstructorAnalyticsPage from './pages/instructor/InstructorAnalyticsPage'
 
-// Chat
-const ChatPage                = lazy(() => import('./pages/chat/ChatPage'))
+// Chat page
+import ChatPage from './pages/chat/ChatPage'
 
 // Student pages
-const StudentDashboard        = lazy(() => import('./pages/student/StudentDashboard'))
-const CalendarPage            = lazy(() => import('./pages/student/CalendarPage'))
-const GradesPage              = lazy(() => import('./pages/student/GradesPage'))
-const AIAssistantPage         = lazy(() => import('./pages/student/AIAssistantPage'))
-const PaymentsPage            = lazy(() => import('./pages/student/PaymentsPage'))
-const DeadlinesPage           = lazy(() => import('./pages/student/DeadlinesPage'))
-const StudentSettingsPage     = lazy(() => import('./pages/student/SettingsPage'))
-
-// Fallback spinner while lazy chunk loads
-function PageLoader() {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-7 h-7 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
-}
+import StudentDashboard from './pages/student/StudentDashboard'
+import CalendarPage from './pages/student/CalendarPage'
+import GradesPage from './pages/student/GradesPage'
+import AIAssistantPage from './pages/student/AIAssistantPage'
+import PaymentsPage from './pages/student/PaymentsPage'
+import DeadlinesPage from './pages/student/DeadlinesPage'
+import StudentSettingsPage from './pages/student/SettingsPage'
 
 function App() {
   const { isAuthenticated, user, checkAuth, isCheckingAuth, sessionExpired, markSessionExpired } = useAuthStore()
@@ -154,7 +143,6 @@ function App() {
   return (
     <Router>
       {sessionExpired && <SessionExpiredModalWrapper />}
-      <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public routes - always light theme */}
         <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
@@ -367,7 +355,6 @@ function App() {
           <Route path="/chat" element={<ChatPage />} />
         </Route>
       </Routes>
-      </Suspense>
     </Router>
   )
 }

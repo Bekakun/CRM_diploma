@@ -425,7 +425,7 @@ export default function AdminPaymentsPage() {
               {/* Sort icon */}
               <div className="relative shrink-0">
                 <button onClick={() => setSortMenuOpen(v => !v)}
-                  className={`flex items-center justify-center w-10 h-10 rounded-xl border transition-all ${sortMenuOpen ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-400 text-primary-600 dark:text-primary-400' : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300'}`}>
+                  className={`flex items-center justify-center w-10 h-10 rounded-xl border transition-all ${sortMenuOpen ? 'bg-primary-100 dark:bg-primary-900/30 border-primary-400 text-primary-600 dark:text-primary-400' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400'}`}>
                   <ArrowUpDown className="w-4 h-4" />
                 </button>
                 {sortMenuOpen && (

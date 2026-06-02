@@ -2,6 +2,7 @@ import { X, Edit, Ban, BookOpen, Mail, Phone, Calendar, ShieldCheck, Trash2 } fr
 import { UserRole } from '../../types'
 import { useAuthStore } from '../../context/authStore'
 import { getFileUrl } from '../../utils/fileUrl'
+import { useTranslation } from 'react-i18next'
 
 interface User {
   id: string
@@ -41,13 +42,20 @@ const STATUS_COLORS: Record<string, string> = {
   INACTIVE: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
   PENDING: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400',
 }
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Активен', INACTIVE: 'Неактивен', PENDING: 'Ожидает',
-}
-
 export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus, onEnroll, onDelete }: Props) {
   const { user: currentUser } = useAuthStore()
+  const { t, i18n } = useTranslation()
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
+
+  const ROLE_LABELS_T: Record<UserRole, string> = {
+    SUPER_ADMIN: t('roles.SUPER_ADMIN'),
+    ADMIN: t('roles.ADMIN'),
+    INSTRUCTOR: t('roles.INSTRUCTOR'),
+    STUDENT: t('roles.STUDENT'),
+  }
+  const STATUS_LABELS_T: Record<string, string> = {
+    ACTIVE: t('common.active'), INACTIVE: t('common.inactive'), PENDING: t('common.pending'),
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -80,7 +88,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                 {user.firstName} {user.lastName}
               </p>
               <span className={`mt-2 inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[user.role]}`}>
-                {ROLE_LABELS[user.role]}
+                {ROLE_LABELS_T[user.role]}
               </span>
             </div>
           </div>
@@ -88,26 +96,26 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
           {/* Right — info */}
           <div className="flex-1 p-6 flex flex-col gap-5">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Информация об аккаунте</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t('admin.users.accountInfo')}</h2>
               <p className="text-xs text-gray-400 mt-0.5">ID: {user.id}</p>
             </div>
 
             <div className="space-y-3">
               <InfoRow icon={<Mail className="w-4 h-4" />} label="Email" value={user.email} />
-              <InfoRow icon={<Phone className="w-4 h-4" />} label="Телефон" value={user.phone || '—'} />
+              <InfoRow icon={<Phone className="w-4 h-4" />} label={t('common.phone')} value={user.phone || '—'} />
               <InfoRow
                 icon={<ShieldCheck className="w-4 h-4" />}
-                label="Статус"
+                label={t('admin.users.colStatus')}
                 value={
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[user.status] ?? ''}`}>
-                    {STATUS_LABELS[user.status] ?? user.status}
+                    {STATUS_LABELS_T[user.status] ?? user.status}
                   </span>
                 }
               />
               <InfoRow
                 icon={<Calendar className="w-4 h-4" />}
-                label="Регистрация"
-                value={new Date(user.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                label={t('admin.users.colRegistration')}
+                value={new Date(user.createdAt).toLocaleDateString(i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
               />
             </div>
 
@@ -118,7 +126,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                   className="btn-secondary flex items-center gap-2 text-sm"
                 >
                   <Edit className="w-4 h-4" />
-                  Редактировать
+                  {t('common.edit')}
                 </button>
               )}
 
@@ -128,7 +136,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                   className="btn-secondary flex items-center gap-2 text-sm"
                 >
                   <BookOpen className="w-4 h-4" />
-                  Записать на курс
+                  {t('admin.users.enrollStudent')}
                 </button>
               )}
 
@@ -142,7 +150,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                   }`}
                 >
                   <Ban className="w-4 h-4" />
-                  {user.status === 'ACTIVE' ? 'Деактивировать' : 'Активировать'}
+                  {user.status === 'ACTIVE' ? t('admin.users.deactivate') : t('admin.users.activate')}
                 </button>
               )}
 
@@ -152,7 +160,7 @@ export default function UserProfileModal({ user, onClose, onEdit, onToggleStatus
                   className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl font-medium transition-colors border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Удалить
+                  {t('admin.users.deleteUser')}
                 </button>
               )}
             </div>

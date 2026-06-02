@@ -68,10 +68,19 @@ export default function ManageUsersPage() {
   const [editLoading, setEditLoading] = useState(false)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false)
 
   const pageSize = 20
 
   useEffect(() => { loadUsers() }, [page])
+
+  // Close role dropdown on outside click
+  useEffect(() => {
+    if (!roleMenuOpen) return
+    const handler = () => setRoleMenuOpen(false)
+    const timer = setTimeout(() => document.addEventListener('click', handler), 0)
+    return () => { clearTimeout(timer); document.removeEventListener('click', handler) }
+  }, [roleMenuOpen])
 
   // Close menu on outside click
   useEffect(() => {
@@ -213,16 +222,42 @@ export default function ManageUsersPage() {
                 className="input-field pl-9"
               />
             </div>
+            {/* Custom role dropdown */}
             <div className="relative sm:w-48 shrink-0">
-              <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)}
-                className="input-field appearance-none w-full pr-9">
-                <option value="all">{t('admin.users.allRoles')}</option>
-                <option value="SUPER_ADMIN">{t('admin.users.filterSuperAdmins')}</option>
-                <option value="ADMIN">{t('admin.users.filterAdmins')}</option>
-                <option value="INSTRUCTOR">{t('admin.users.filterInstructors')}</option>
-                <option value="STUDENT">{t('admin.users.filterStudents')}</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <button
+                onClick={() => setRoleMenuOpen(v => !v)}
+                className={`input-field flex items-center gap-2 w-full text-left pr-9 ${roleMenuOpen ? 'border-primary-400 ring-2 ring-primary-500/30' : ''}`}
+              >
+                <span className="flex-1 truncate text-sm">
+                  {filterRole === 'all' ? t('admin.users.allRoles')
+                    : filterRole === 'SUPER_ADMIN' ? t('admin.users.filterSuperAdmins')
+                    : filterRole === 'ADMIN' ? t('admin.users.filterAdmins')
+                    : filterRole === 'INSTRUCTOR' ? t('admin.users.filterInstructors')
+                    : t('admin.users.filterStudents')}
+                </span>
+              </button>
+              <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${roleMenuOpen ? 'rotate-180' : ''}`} />
+              {roleMenuOpen && (
+                <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-full sm:w-52 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
+                  {[
+                    { value: 'all',         label: t('admin.users.allRoles') },
+                    { value: 'SUPER_ADMIN', label: t('admin.users.filterSuperAdmins') },
+                    { value: 'ADMIN',       label: t('admin.users.filterAdmins') },
+                    { value: 'INSTRUCTOR',  label: t('admin.users.filterInstructors') },
+                    { value: 'STUDENT',     label: t('admin.users.filterStudents') },
+                  ].map(opt => (
+                    <button key={opt.value}
+                      onClick={() => { setFilterRole(opt.value); setRoleMenuOpen(false) }}
+                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 transition-colors
+                        ${filterRole === opt.value
+                          ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 font-medium'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${filterRole === opt.value ? 'bg-primary-500' : 'bg-transparent'}`} />
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

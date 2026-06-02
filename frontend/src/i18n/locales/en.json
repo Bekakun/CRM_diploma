@@ -275,6 +275,7 @@
       "saving": "Saving...",
       "roleSuperAdmin": "Super Administrator",
       "viewOnly": "View only",
+      "accountInfo": "Account information",
       "deleteUser": "Delete",
       "deleteConfirmTitle": "Delete user?",
       "deleteConfirmText": "Are you sure you want to delete {{name}}?",

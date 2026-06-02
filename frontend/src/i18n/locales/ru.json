@@ -275,6 +275,7 @@
       "saving": "Сохранение...",
       "roleSuperAdmin": "Супер-администратор",
       "viewOnly": "Только просмотр",
+      "accountInfo": "Информация об аккаунте",
       "deleteUser": "Удалить",
       "deleteConfirmTitle": "Удалить пользователя?",
       "deleteConfirmText": "Вы уверены, что хотите удалить {{name}}?",

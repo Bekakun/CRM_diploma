@@ -238,7 +238,7 @@ export default function ManageUsersPage() {
               </button>
               <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none transition-transform duration-200 ${roleMenuOpen ? 'rotate-180' : ''}`} />
               {roleMenuOpen && (
-                <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-full sm:w-52 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
+                <div className="absolute left-0 top-full mt-1.5 w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 py-1 animate-[fadeSlideUp_0.15s_ease_both]">
                   {[
                     { value: 'all',         label: t('admin.users.allRoles') },
                     { value: 'SUPER_ADMIN', label: t('admin.users.filterSuperAdmins') },

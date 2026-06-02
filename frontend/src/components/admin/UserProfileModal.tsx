@@ -31,12 +31,6 @@ const ROLE_COLORS: Record<UserRole, string> = {
   INSTRUCTOR: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
   STUDENT: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400',
 }
-const ROLE_LABELS: Record<UserRole, string> = {
-  SUPER_ADMIN: 'Супер-админ',
-  ADMIN: 'Админ',
-  INSTRUCTOR: 'Преподаватель',
-  STUDENT: 'Студент',
-}
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400',
   INACTIVE: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400',

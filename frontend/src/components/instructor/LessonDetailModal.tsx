@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Video, CheckCircle, ExternalLink, Pencil, Paperclip, Trash2, BookOpen, Github, Star, RotateCcw, Plus } from 'lucide-react'
+import { X, Video, CheckCircle, ExternalLink, Pencil, Paperclip, Trash2, BookOpen, Github, Star, RotateCcw, Plus, Clock, MapPin } from 'lucide-react'
 import api from '../../services/api'
 
 interface LessonDetailModalProps {
@@ -793,14 +793,14 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
             <>
               {/* Info chips */}
               <div className="flex flex-wrap gap-2 text-sm">
-                {lesson.location && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl">
-                    📍 {lesson.location}
-                  </span>
-                )}
                 {lesson.durationMinutes && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl">
-                    ⏱ {lesson.durationMinutes} мин
+                    <Clock className="w-3.5 h-3.5 shrink-0" /> {lesson.durationMinutes} мин
+                  </span>
+                )}
+                {lesson.location && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl">
+                    <MapPin className="w-3.5 h-3.5 shrink-0" /> {lesson.location}
                   </span>
                 )}
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium ${
@@ -825,7 +825,7 @@ export default function LessonDetailModal({ lesson, onClose, onSave }: LessonDet
                   Ссылка на видеозапись
                 </label>
                 <div className="relative">
-                  <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10" />
                   <input
                     type="url"
                     value={recordingUrl}

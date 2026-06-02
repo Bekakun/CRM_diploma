@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, BookOpen, Ban, Edit, RefreshCw, MoreVertical, Users, Trash2 } from 'lucide-react'
+import { Search, BookOpen, Ban, Edit, RefreshCw, MoreVertical, Users, Trash2, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import EnrollStudentModal from '../../components/admin/EnrollStudentModal'
 import UserProfileModal from '../../components/admin/UserProfileModal'
@@ -213,13 +213,17 @@ export default function ManageUsersPage() {
                 className="input-field pl-9"
               />
             </div>
-            <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="input-field sm:w-48 pr-8">
-              <option value="all">{t('admin.users.allRoles')}</option>
-              <option value="SUPER_ADMIN">{t('admin.users.filterSuperAdmins')}</option>
-              <option value="ADMIN">{t('admin.users.filterAdmins')}</option>
-              <option value="INSTRUCTOR">{t('admin.users.filterInstructors')}</option>
-              <option value="STUDENT">{t('admin.users.filterStudents')}</option>
-            </select>
+            <div className="relative sm:w-48 shrink-0">
+              <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)}
+                className="input-field appearance-none w-full pr-9">
+                <option value="all">{t('admin.users.allRoles')}</option>
+                <option value="SUPER_ADMIN">{t('admin.users.filterSuperAdmins')}</option>
+                <option value="ADMIN">{t('admin.users.filterAdmins')}</option>
+                <option value="INSTRUCTOR">{t('admin.users.filterInstructors')}</option>
+                <option value="STUDENT">{t('admin.users.filterStudents')}</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
 
           {/* Mobile card list */}
